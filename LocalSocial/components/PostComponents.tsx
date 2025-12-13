@@ -1,33 +1,43 @@
 import { Image, StyleSheet, Text, View } from "react-native";
 
-export function PostHolder() {
+type HolderProps = {
+    eventName: string;
+    postList: typeof PostHolder[];
+}
+
+export function PostHolder(props: HolderProps) {
     return (
         <View style={postHolderStyles.holder}>
             <View style={postHolderStyles.title}>
-                <Text>Event Name</Text>
+                <Text>props.eventName</Text>
             </View>
-            <SmallPost/>
-            <SmallPost/>
-            <SmallPost/>
         </View>
     );
 }
 
-export function SmallPost() {
+export type PostProps = {
+    authorName: string;
+    postTitle: string;
+    postBody: string;
+    authorPictureURL: string;
+    postMediaURL: string;
+}
+
+export function SmallPost(props: PostProps) {
     return (
         <View style={postStyles.container}>
             <View style={postStyles.titleContents}>
-                <Image source={{uri:"https://reactnative.dev/img/tiny_logo.png"}} style={postStyles.authorImage} resizeMode="cover"/>
+                <Image source={{uri:props.authorPictureURL}} style={postStyles.authorImage} resizeMode="cover"/>
                 <View style={postStyles.titleTextBox}>
                     <View style={postStyles.titleTextAlign}>
-                        <Text style={postStyles.authorText}>Post Author</Text>
-                        <Text style={postStyles.titleText}>Post Title</Text>
+                        <Text style={postStyles.authorText}>props.authorName</Text>
+                        <Text style={postStyles.titleText}>props.postTitle</Text>
                     </View>
                 </View>
             </View>
             <View style={postStyles.contents}>
-                <Image source={{uri:"https://reactnative.dev/img/tiny_logo.png"}} style={postStyles.contentsImage} resizeMode="cover"/>
-                <Text style={postStyles.contentsText}>This is an example of some post contents. Well, herre they are i guess</Text>
+                <Image source={{uri:props.postMediaURL}} style={postStyles.contentsImage} resizeMode="cover"/>
+                <Text style={postStyles.contentsText}>props.postBody</Text>
             </View>
         </View>
     )

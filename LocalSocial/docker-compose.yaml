@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+  api-postgrest:
+    image: postgrest/postgrest
+    ports:
+      - 3000:3000
+    depends_on:
+      - database-postgres
+    environment:
+      - PGRST_DB_URI=postgres://adminuser:admin@database-postgres:5432/localsocial_db
+      - PGRST_DB_SCHEMA=public
+      - PGRST_DB_ANON_ROLE=web_anon
+
+  database-postgres:
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=adminuser
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=localsocial_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
