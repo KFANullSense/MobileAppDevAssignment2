@@ -1,12 +1,14 @@
 import BrowseScreen from '@/screens/Browse/BrowseScreen';
 import FriendsScreen from '@/screens/Friends/FriendsScreen';
 import HomeScreen from "@/screens/Home/HomeScreen";
+import LogInScreen from '@/screens/LogIn/LogInScreen';
 import MyEventsScreen from '@/screens/MyEvents/MyEventsScreen';
 import MyProfileScreen from '@/screens/Profile/MyProfileScreen';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { useState } from 'react';
 
 const TabNav = () => {
   const Tab = createBottomTabNavigator();
@@ -78,7 +80,15 @@ const TabNav = () => {
 }
 
 export default function App() {
-  return (
-    <TabNav/>
-  );
+  const [localUserID, setLocalUserID] = useState(-1);
+
+  if (localUserID == -1) {
+    return (
+      <LogInScreen/>
+    );
+  } else {
+    return (
+      <TabNav/>
+    );
+  }
 }

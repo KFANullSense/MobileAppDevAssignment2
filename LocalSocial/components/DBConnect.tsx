@@ -1,27 +1,35 @@
-import { SmallPost } from '@/components/PostComponents';
+import { supabase } from '@/lib/supabase';
 
-const DB_URL = 'http://localhost:3000/'
-
-type GetEventProps = {
-    event_id: number;
+type UserDetailsProps = {
+    username: string;
+    password: string;
 }
 
-export async function getEventPosts(props: GetEventProps) {
-    try {
-        const response = await fetch('${DB_URL}rpc/geteventposts?eventid={props.event_id}');
-        const responseJSON = await response.json();
+export async function CreateUser(props: UserDetailsProps) {
+    const { data: validateData, error: error } = await supabase.from("users").select("username").eq("username", props.username);
+
+    if (error) {
+        console.error("Error logging in: ", error.message);
+    }
+    else if (validateData?.length != 0) {
+        console.log(validateData?.length);
+        console.error("User already exists");
+    } else {
+        await supabase.rpc('createuser', {username_input: props.username, password_input: props.password});
         
+        return LogInToUser(props);
+    }
+}
 
-        if (responseJSON.data) {
-            var postList: typeof SmallPost[] = [];
-
-            for (var post in responseJSON.data) {
-                return <SmallPost authorName ={post.username} postTitle={post.post_title} postBody={post.post_body} postMediaURL={post.post_image_url} authorPictureURL= {""}/>;
-            }
-        } else {
-            console.error("Failed to fetch event: ", responseJSON);
-        }
-    } catch (error) {
-        console.error("Error getting event: ", error);
+export async function LogInToUser(props: UserDetailsProps) {
+    const {data, error} = await supabase.from("users").select("user_id").eq("username", props.username).eq("password", props.password);
+    if (error) {
+        console.error("Error logging in: ", error.message);
+    } else if (data.length == 0) {
+        console.error("Could not find a user with those details");
+    }
+    else if (data) {
+        console.log(data[0].user_id);
+        return data[0].user_id;
     }
 }
