@@ -15,11 +15,11 @@ async function PrintDBResults() {
     // const { data } = await supabase.rpc('createuser', {username_input: "testuserfromreact", password_input:"testpw"});
     // console.log(data);
 
-    App.setLocal = CreateUser({username:"testuserreact_newbutagain", password:"testpw"});
+    CreateUser({username:"testuserreact_newbutagain", password:"testpw"});
 }
 
 export default function LogInScreen() {
-    PrintDBResults();
+    //PrintDBResults();
 
     const [username, onChangeUsername] = React.useState('');
     const [password, onChangePassword] = React.useState('');
