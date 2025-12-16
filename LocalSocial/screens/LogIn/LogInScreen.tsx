@@ -1,6 +1,6 @@
-import { CreateUser } from '@/components/DBConnect';
+import { CreateUser, LogInToUser } from '@/components/DBConnect';
 import React from 'react';
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 function Header() {
     return (
@@ -10,30 +10,30 @@ function Header() {
     );
 }
 
-
-async function PrintDBResults() {
-    // const { data } = await supabase.rpc('createuser', {username_input: "testuserfromreact", password_input:"testpw"});
-    // console.log(data);
-
-    CreateUser({username:"testuserreact_newbutagain", password:"testpw"});
+type LogInScreenProps = {
+    updateIDFunc: (newID: number) => void;
 }
 
-export default function LogInScreen() {
-    //PrintDBResults();
+export default function LogInScreen(props: LogInScreenProps) {
+    const [username, setUsername] = React.useState('');
+    const [password, setPassword] = React.useState('');
 
-    const [username, onChangeUsername] = React.useState('');
-    const [password, onChangePassword] = React.useState('');
-    
+    const updateIDAsync = async (username: string, password: string) => {
+        props.updateIDFunc(await LogInToUser({username: username, password: password}))
+    }
+
     return (
         <View style={styles.container}>
             <Header/>
             <View style={styles.loginContainer}>
-                <TextInput style={styles.input} placeholder="Username" value={username} onChangeText={onChangeUsername}>
-
-                </TextInput>
-                <TextInput style={styles.input} placeholder="Password" value={password} onChangeText={onChangePassword}>
-
-                </TextInput>
+                <TextInput style={styles.loginTextbox} placeholder="Username" onChangeText={(value) => setUsername(value)}/>
+                <TextInput style={styles.loginTextbox} placeholder="Password" onChangeText={(value) => setPassword(value)}/>
+                <Pressable style={styles.loginButton} onPress={async () => {props.updateIDFunc(await LogInToUser({username: username, password: password}))}}>
+                    <Text>Log In</Text>
+                </Pressable>
+                <Pressable style={styles.loginButton} onPress={async() => {props.updateIDFunc(await CreateUser({username: username, password:password}))}}>
+                    <Text>Register</Text>
+                </Pressable>
             </View>
         </View>
     )
@@ -51,12 +51,19 @@ const styles = StyleSheet.create({
         paddingBottom: 20
     },
     loginContainer: {
-        backgroundColor: '#b6dee5ff'
+        alignItems: 'center',
     },
-    input: {
-        height: 49,
-        margin: 12,
-        borderWidth: 1,
-        padding: 10
+    loginTextbox: {
+        backgroundColor: '#ffffff',
+        width: '80%',
+        margin:5
+    },
+    loginButton: {
+        backgroundColor: '#ab9dfaff',
+        width: '80%',
+        height: 30,
+        alignItems: 'center',
+        margin:5,
+        borderRadius:10
     }
 })

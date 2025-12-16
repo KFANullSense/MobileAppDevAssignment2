@@ -82,9 +82,13 @@ const TabNav = () => {
 export default function App() {
   const [localUserID, setLocalUserID] = useState(-1);
 
+  function updateUserID(newUserID: number) {
+    setLocalUserID(newUserID);
+  }
+
   if (localUserID == -1) {
     return (
-      <LogInScreen/>
+      <LogInScreen updateIDFunc={updateUserID}/>
     );
   } else {
     return (
