@@ -1,4 +1,3 @@
-import { PostHolder } from '@/components/PostComponents';
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 function Header() {
@@ -16,8 +15,6 @@ export default function HomeScreen() {
         <View style={styles.container}>
             <Header/>
             <ScrollView>
-                <PostHolder/>
-                <PostHolder/>
             </ScrollView>
         </View>
     )

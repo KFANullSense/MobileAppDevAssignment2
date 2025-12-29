@@ -13,7 +13,7 @@ import { useState } from 'react';
 const TabNav = () => {
   const Tab = createBottomTabNavigator();
   return (
-    <Tab.Navigator>
+    <Tab.Navigator initialRouteName="Home" screenOptions={{headerShown: false}}>
       <Tab.Screen
       name = "Profile"
       component = {MyProfileScreen}

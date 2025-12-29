@@ -2,14 +2,23 @@ import { Image, StyleSheet, Text, View } from "react-native";
 
 type HolderProps = {
     eventName: string;
-    postList: typeof PostHolder[];
+    postList: PostProps[];
 }
 
 export function PostHolder(props: HolderProps) {
+    const transformedPosts = props.postList.map(localPost => <PostObject
+            authorName={localPost.authorName}
+            postTitle={localPost.postTitle}
+            postBody={localPost.postBody}
+            authorPictureURL={localPost.authorPictureURL}
+            postMediaURL={localPost.postMediaURL}
+        ></PostObject>)
+    
     return (
         <View style={postHolderStyles.holder}>
             <View style={postHolderStyles.title}>
                 <Text>props.eventName</Text>
+                <ul>{transformedPosts}</ul>
             </View>
         </View>
     );
@@ -23,7 +32,7 @@ export type PostProps = {
     postMediaURL: string;
 }
 
-export function SmallPost(props: PostProps) {
+export function PostObject(props: PostProps) {
     return (
         <View style={postStyles.container}>
             <View style={postStyles.titleContents}>
