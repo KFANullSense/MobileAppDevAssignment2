@@ -17,7 +17,7 @@ export async function CreateUser(props: UserDetailsProps) {
         console.log(validateData?.length);
         console.error("User already exists");
     } else {
-        await supabase.rpc('createuser', {username_input: props.username, password_input: props.password});
+        await supabase.from("users").insert({ username: props.username, password: props.password, profile_picture_url: "" });
         
         return LogInToUser(props);
     }
@@ -46,12 +46,56 @@ type PostIDProps = {
 export async function ReturnPostLikes(props: PostIDProps) {
     console.log("Returning likes count from post ", props.postID);
 
-    const {count, error} = await supabase.from("post_likes").select("*", {count: 'exact', head: 'true'});
+    const {count, error} = await supabase.from("post_likes").select("*", {count: 'exact', head: true});
 
     if (error) {
         console.error("Error retrieving post likes: ", error.message);
     } else {
         return count;
+    }
+}
+
+export async function ReturnFullPost(props: PostIDProps) {
+    console.log("Returning full post from ID ", props.postID);
+
+    const {data, error} = await supabase.from("posts").select("*").eq("post_id", props.postID);
+
+    if (error) {
+        console.error("Error fetching post: ", error.message);
+    } else if (data.length == 0) {
+        console.error("Post could not be found");
+    } else {
+        console.log(data);
+    }
+}
+
+type UserIDProps = {
+    userID: number;
+}
+
+export async function ReturnUserDetails(props: UserIDProps) {
+    console.log("Returning user details from ID ", props.userID);
+
+    const {data, error} = await supabase.from("users").select("username, profile_picture").eq("user_id", props.userID);
+
+    if (error) {
+        console.error("Error fetching post: ", error.message);
+    } else if (data.length == 0) {
+        console.error("Post could not be found");
+    } else {
+        console.log(data);
+    }
+}
+
+export async function GetPostsFromUser(props: UserIDProps) {
+    console.log("Returning post list from user ", props.userID);
+
+    const {data, error} = await supabase.rpc("getuserposts", {input_event_id: props.userID});
+
+    if (error) {
+        console.error("Error fetching user posts: ", error);
+    } else {
+        console.log(data);
     }
 }
 
@@ -65,7 +109,21 @@ export async function GetPostsFromEvent(props: EventIDProps) {
     const {data, error} = await supabase.rpc("geteventposts", {input_event_id: props.eventID});
 
     if (error) {
-        console.error("Error creating event: ", error);
+        console.error("Error fetching event posts: ", error);
+    } else {
+        console.log(data);
+    }
+}
+
+export async function ReturnFullEvent(props: EventIDProps) {
+    console.log("Returning full post from ID ", props.eventID);
+
+    const {data, error} = await supabase.from("events").select("*").eq("event_id", props.eventID);
+
+    if (error) {
+        console.error("Error fetching event: ", error.message);
+    } else if (data.length == 0) {
+        console.error("Event could not be found");
     } else {
         console.log(data);
     }
@@ -74,14 +132,16 @@ export async function GetPostsFromEvent(props: EventIDProps) {
 type EventCreationProps = {
     positionString: string;
     eventName: string;
+    eventDescription: string;
     eventStartTime: string;
     eventEndTime: string;
+    userID: number;
 }
 
 export async function CreateEvent(props: EventCreationProps) {
     console.log("Atempting to create event");
 
-    const {error} = await supabase.rpc("createevent", {eventname: props.eventName, eventlocation: props.positionString, starttime: props.eventStartTime, endtime: props.eventEndTime});
+    const {error} = await supabase.rpc("createevent", {eventname: props.eventName, eventdescription: props.eventDescription, eventlocation: props.positionString, starttime: props.eventStartTime, endtime: props.eventEndTime});
 
     if (error) {
         console.error("Error creating event: ", error);
@@ -107,5 +167,50 @@ export async function CreatePost(props: PostCreationProps) {
         console.error("Error creating post: ", error);
     } else {
         console.log("Post created successfully");
+    }
+}
+
+type PostLeaveJoinProps = {
+    userID: number;
+    eventID: number;
+}
+
+export async function JoinEvent(props: PostLeaveJoinProps) {
+    console.log("Attempting to join user ", props.userID, " to event ", props.eventID);
+
+    const {data, error: fetchError} = await supabase.from("events").select("*").eq("event_id", props.eventID); 
+
+    if (fetchError) {
+        console.error("Error fetching event: ", fetchError);
+    } else if (data.length == 0) {
+        console.error("Event does not exist!");
+    } else {
+        const {error} = await supabase.from("user_events").insert({ event_id: props.eventID, user_id: props.userID, is_host: false });
+
+        if (error) {
+            console.error("Error joining event: ", error);
+        } else {
+            console.log("Event joined successfully");
+        }
+    }
+}
+
+export async function LeaveEvent(props: PostLeaveJoinProps) {
+    console.log("Attempting to leave user ", props.userID, " from event ", props.eventID);
+
+    const {data, error: fetchError} = await supabase.from("events").select("*").eq("event_id", props.eventID); 
+
+    if (fetchError) {
+        console.error("Error fetching event: ", fetchError);
+    } else if (data.length == 0) {
+        console.error("Event does not exist!");
+    } else {
+        const {error} = await supabase.from("user_events").delete().eq("event_id", props.eventID).eq("user_id", props.userID);
+
+        if (error) {
+            console.error("Error leaving event: ", error);
+        } else {
+            console.log("Event left successfully");
+        }
     }
 }
