@@ -18,10 +18,6 @@ export default function LogInScreen(props: LogInScreenProps) {
     const [username, setUsername] = React.useState('');
     const [password, setPassword] = React.useState('');
 
-    const updateIDAsync = async (username: string, password: string) => {
-        props.updateIDFunc(await LogInToUser({username: username, password: password}))
-    }
-
     return (
         <View style={styles.container}>
             <Header/>

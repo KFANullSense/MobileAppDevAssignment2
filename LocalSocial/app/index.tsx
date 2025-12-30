@@ -10,7 +10,11 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useState } from 'react';
 
-const TabNav = () => {
+export type GlobalUserIDProps = {
+  userID: number;
+}
+
+const TabNav = (props: GlobalUserIDProps) => {
   const Tab = createBottomTabNavigator();
   return (
     <Tab.Navigator initialRouteName="Home" screenOptions={{headerShown: false}}>
@@ -52,7 +56,7 @@ const TabNav = () => {
       />
       <Tab.Screen
       name = "My Events"
-      component = {MyEventsScreen}
+      children = {() => <MyEventsScreen userID={props.userID}/>}
       options = {{
         tabBarIcon: ({color, size}) => (
           <FontAwesome5
@@ -92,7 +96,7 @@ export default function App() {
     );
   } else {
     return (
-      <TabNav/>
+      <TabNav userID={localUserID}/>
     );
   }
 }
