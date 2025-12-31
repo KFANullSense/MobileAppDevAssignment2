@@ -80,16 +80,12 @@ export function EventObject(props: EventProps) {
         <View style={eventStyles.container}>
             <View style={eventStyles.contents}>
                 <View style={eventStyles.headerContents}>
-                    <View style={eventStyles.leftSideContainer}>
-                        <View style={eventStyles.titleContents}>
-                            <Text style={eventStyles.titleText}>{props.eventName}</Text>
-                            <Text style={eventStyles.contentsText}>Start: {props.startTime}</Text>
-                            <Text style={eventStyles.contentsText}>End: {props.endTime}</Text>
-                        </View>
+                    <View style={eventStyles.titleContents}>
+                        <Text style={eventStyles.titleText}>{props.eventName}</Text>
+                        <Text style={eventStyles.contentsText}>Start: {props.startTime}</Text>
+                        <Text style={eventStyles.contentsText}>End: {props.endTime}</Text>
                     </View>
-                    <View style={eventStyles.rightSideContainer}>
-                        <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={eventStyles.contentsImage} resizeMode="cover"/>
-                    </View>
+                    <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={eventStyles.contentsImage} resizeMode="cover"/>
                 </View>
                 <Text style={eventStyles.contentsText}>this is a big test of a long description. i need to see what it looks like when im describing things and allat</Text>
             </View>
@@ -188,16 +184,15 @@ const eventStyles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#50bbc9ff',
         margin:10,
+        padding:10,
         borderRadius:10,
         flex:1,
         width:'95%',
     },
     titleContents: {
         borderRadius:10,
-        margin:10,
         padding:5,
         backgroundColor: '#91c7ceff',
-        flex:0
     },
     titleText: {
         fontSize: 16
@@ -205,7 +200,8 @@ const eventStyles = StyleSheet.create({
     headerContents: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        flex:0
+        width:'100%',
+        marginBottom:5
     },
     contentsImage: {
         borderRadius:10,
@@ -218,14 +214,10 @@ const eventStyles = StyleSheet.create({
         fontSize: 14,
     },
     leftSideContainer: {
-        flex:1,
-        justifyContent: 'flex-start',
+        
     },
     rightSideContainer: {
-        flex:1,
-        justifyContent: 'flex-start',
-        margin:10,
-        alignItems:'flex-end'
+        
     },
     contents: {
         flex:0
