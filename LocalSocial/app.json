@@ -25,7 +25,7 @@
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "android.permissions.ACCESS_FINE_LOCATION",
-        "android.permissions.ACCESS_FINE_LOCATION"
+        "android.permissions.ACCESS_BACKGROUND_LOCATION"
       ],
       "package": "com.anonymous.LocalSocial"
     },

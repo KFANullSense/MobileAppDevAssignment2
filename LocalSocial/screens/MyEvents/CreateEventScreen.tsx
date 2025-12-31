@@ -1,9 +1,13 @@
-import React from "react";
+import { GlobalUserIDProps } from "@/app";
+import { CreateEvent } from "@/components/DBConnect";
+import { ConvertDateTimeForSQL, GetCurrentLocationForSQL } from "@/components/HelperFunctions";
+import { useNavigation } from "@react-navigation/native";
+import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
-export default function CreateEventScreen() {
-    const [title, setTitle] = React.useState('');
+export default function CreateEventScreen(props: GlobalUserIDProps) {
+    const [title, setTitle] = useState('');
     const [description, setDescription] = React.useState('');
     const [startTime, setStartTime] = React.useState(new Date());
     const [endTime, setEndTime] = React.useState(new Date);
@@ -20,13 +24,28 @@ export default function CreateEventScreen() {
     const hideEndDatePicker = () => { setEndDatePickerVisible(false); }
     const confirmEndDatePicker = (value) => { setEndTime(value); hideEndDatePicker();}
 
-    // function ValidateInput(title: string, description: string) {
-    //     if (title.length == 0 || description.length == 0) {
-    //         console.error("Title and description cannot be empty")
-    //     } else {
-    //         CreateEvent({eventName: title, eventDescription: description})
-    //     }
-    // }
+    async function ValidateInput() {
+        if (title.length == 0 || description.length == 0) {
+            console.error("Title and description cannot be empty")
+        } else {
+            if (endTime <= startTime) {
+                console.error("End time cannot be before or equal to start time");
+            } else {
+                const locationValue = await GetCurrentLocationForSQL();
+
+                if (locationValue == "") {
+                    console.error("Error while fetching location");
+                } else {
+                    const result = await CreateEvent({eventName: title, eventDescription: description, positionString: locationValue, eventStartTime: ConvertDateTimeForSQL(startTime), eventEndTime: ConvertDateTimeForSQL(endTime), userID: props.userID})
+
+                    if (result == true) {
+                        const navigation = useNavigation();
+                        navigation.getParent()?.goBack();
+                    }
+                }
+            }
+        }
+    }
 
     return (
         <View style={styles.container}>
@@ -35,18 +54,17 @@ export default function CreateEventScreen() {
                 <TextInput style={styles.descriptionInput} multiline placeholder="Event Description" onChangeText={(value) => setDescription(value)}/>
 
                 <Pressable onPress={showStartDatePicker} style={styles.dateTimeButton}>
-                    <Text>Start Time: {startTime.toString()}</Text>
+                    <Text>Start Time: {ConvertDateTimeForSQL(startTime)}</Text>
                 </Pressable>
                 <DateTimePickerModal isVisible={isStartDatePickerVisible} mode="datetime" onConfirm={confirmStartDatePicker} onCancel={hideStartDatePicker}/>
 
                 <Pressable onPress={showEndDatePicker} style={styles.dateTimeButton}>
-                    <Text>End Time: {endTime.toString()}</Text>
+                    <Text>End Time: {ConvertDateTimeForSQL(endTime)}</Text>
                 </Pressable>
                 <DateTimePickerModal isVisible={isEndDatePickerVisible} mode="datetime" onConfirm={confirmEndDatePicker} onCancel={hideEndDatePicker}/>
-
             </View>
-            <View style={styles.floatingContainer}>
-                <Pressable style={styles.createButton}>
+            <View style={styles.floatingContainer}> 
+                <Pressable style={styles.createButton} onPress={async() => ValidateInput()}>
                 </Pressable>
             </View>
         </View>

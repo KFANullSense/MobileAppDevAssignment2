@@ -107,7 +107,7 @@ export async function GetJoinedEvents(props: UserIDProps) {
     if (error) {
         console.error("Error fetching user events:", error);
     } else {
-        console.log(data);
+        return data;
     }
 }
 
@@ -153,12 +153,14 @@ type EventCreationProps = {
 export async function CreateEvent(props: EventCreationProps) {
     console.log("Atempting to create event");
 
-    const {error} = await supabase.rpc("createevent", {eventname: props.eventName, eventdescription: props.eventDescription, eventlocation: props.positionString, starttime: props.eventStartTime, endtime: props.eventEndTime});
+    const {error} = await supabase.rpc("createevent", {eventname: props.eventName, eventdescription: props.eventDescription, eventlocation: props.positionString, starttime: props.eventStartTime, endtime: props.eventEndTime, userid: props.userID});
 
     if (error) {
         console.error("Error creating event:", error);
+        return false;
     } else {
         console.log("Event created successfully");
+        return true;
     }
 }
 

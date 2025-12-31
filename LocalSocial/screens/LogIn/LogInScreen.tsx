@@ -1,5 +1,5 @@
 import { CreateUser, LogInToUser } from '@/components/DBConnect';
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 function Header() {
@@ -15,8 +15,8 @@ type LogInScreenProps = {
 }
 
 export default function LogInScreen(props: LogInScreenProps) {
-    const [username, setUsername] = React.useState('');
-    const [password, setPassword] = React.useState('');
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
 
     return (
         <View style={styles.container}>
