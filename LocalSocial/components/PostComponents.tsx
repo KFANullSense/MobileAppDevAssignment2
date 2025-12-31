@@ -91,9 +91,7 @@ export function EventObject(props: EventProps) {
                         <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={eventStyles.contentsImage} resizeMode="cover"/>
                     </View>
                 </View>
-                <View style={eventStyles.descriptionContainer}>
-                    <Text style={eventStyles.contentsText}>this is a big test of a long description. i need to see what it looks like when im describing things and allat</Text>
-                </View>
+                <Text style={eventStyles.contentsText}>this is a big test of a long description. i need to see what it looks like when im describing things and allat</Text>
             </View>
         </View>
     )
@@ -191,22 +189,23 @@ const eventStyles = StyleSheet.create({
         backgroundColor: '#50bbc9ff',
         margin:10,
         borderRadius:10,
-        width:'95%',
         flex:1,
-        paddingBottom: 20,
+        width:'95%',
     },
     titleContents: {
         borderRadius:10,
         margin:10,
         padding:5,
         backgroundColor: '#91c7ceff',
+        flex:0
     },
     titleText: {
         fontSize: 16
     },
     headerContents: {
         flexDirection: 'row',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        flex:0
     },
     contentsImage: {
         borderRadius:10,
@@ -216,15 +215,11 @@ const eventStyles = StyleSheet.create({
         height:'100%',
     },
     contentsText: {
-        flexShrink:1,
-        fontSize: 14
+        fontSize: 14,
     },
     leftSideContainer: {
         flex:1,
         justifyContent: 'flex-start',
-    },
-    descriptionContainer: {
-        marginLeft: 15,
     },
     rightSideContainer: {
         flex:1,
@@ -233,6 +228,9 @@ const eventStyles = StyleSheet.create({
         alignItems:'flex-end'
     },
     contents: {
-        alignItems:'flex-start'
+        flex:0
+    },
+    descriptionText: {
+        
     }
 })
