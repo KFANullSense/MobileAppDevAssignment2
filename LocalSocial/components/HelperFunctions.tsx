@@ -23,13 +23,9 @@ export async function GetCurrentLocationForSQL(): Promise<string> {
 export function ConvertEventListToProps(inputData: Array<JSON>) {
     var PropList: EventProps[] = [];
 
-    console.log(inputData);
-
     inputData.map(localEvent => {
-        PropList.push({eventName: localEvent.event_name, eventDescription: localEvent.event_description, startTime: localEvent.event_starttime, endTime: localEvent.event_endtime});
+        PropList.push({eventName: localEvent.event_name, eventDescription: localEvent.event_description, startTime: localEvent.event_starttime, endTime: localEvent.event_endtime, eventID: localEvent.event_id});
     })
-
-    console.log(PropList);
 
     return PropList;
 }

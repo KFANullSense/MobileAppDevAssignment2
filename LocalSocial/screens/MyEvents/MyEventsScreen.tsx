@@ -7,6 +7,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useCallback, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import CreateEventScreen from "./CreateEventScreen";
+import FullEventScreen from "./FullEventScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -23,6 +24,7 @@ function RootStack(props:GlobalUserIDProps) {
         <Stack.Navigator initialRouteName="Root">
             <Stack.Screen name="Root" children={() => <MyEventsScreen userID={props.userID}/>} options= {{headerShown: false}}/>
             <Stack.Screen name="Create Event" children={() => <CreateEventScreen userID={props.userID}/>}/>
+            <Stack.Screen name="View Event" children={() => <FullEventScreen/>}/>
         </Stack.Navigator>
     )
 }
@@ -34,8 +36,6 @@ function MyEventsScreen(props: GlobalUserIDProps) {
 
     useFocusEffect(useCallback(() => {
         const fetchEvents = async () => {
-            console.log("big things happening over here");
-
             const eventData = await GetJoinedEvents({userID: props.userID});
 
             setComponentList(ConvertEventListToProps(eventData));

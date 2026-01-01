@@ -7,6 +7,8 @@ import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 export default function CreateEventScreen(props: GlobalUserIDProps) {
+    const navigation = useNavigation();
+
     const [title, setTitle] = useState('');
     const [description, setDescription] = React.useState('');
     const [startTime, setStartTime] = React.useState(new Date());
@@ -39,8 +41,7 @@ export default function CreateEventScreen(props: GlobalUserIDProps) {
                     const result = await CreateEvent({eventName: title, eventDescription: description, positionString: locationValue, eventStartTime: ConvertDateTimeForSQL(startTime), eventEndTime: ConvertDateTimeForSQL(endTime), userID: props.userID})
 
                     if (result == true) {
-                        const navigation = useNavigation();
-                        navigation.getParent()?.goBack();
+                        navigation.goBack();
                     }
                 }
             }

@@ -1,4 +1,5 @@
-import { Image, StyleSheet, Text, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 type PostHolderProps = {
     eventName: string;
@@ -62,6 +63,7 @@ export function EventHolder(props: EventHolderProps) {
                 eventDescription={localEvent.eventDescription}
                 startTime={localEvent.startTime}
                 endTime={localEvent.endTime}
+                eventID={localEvent.eventID}
                 key={i}
             />)}
         </View>
@@ -73,23 +75,28 @@ export type EventProps = {
     eventDescription: string;
     startTime: string;
     endTime: string;
+    eventID: number;
 }
 
 export function EventObject(props: EventProps) {
+    const navigation = useNavigation();
+
     return (
-        <View style={eventStyles.container}>
-            <View style={eventStyles.contents}>
-                <View style={eventStyles.headerContents}>
-                    <View style={eventStyles.titleContents}>
-                        <Text style={eventStyles.titleText}>{props.eventName}</Text>
-                        <Text style={eventStyles.contentsText}>Start: {props.startTime}</Text>
-                        <Text style={eventStyles.contentsText}>End: {props.endTime}</Text>
+        <Pressable onPress={() => navigation.navigate("View Event", {eventID: 1})}>
+            <View style={eventStyles.container}>
+                <View style={eventStyles.contents}>
+                    <View style={eventStyles.headerContents}>
+                        <View style={eventStyles.titleContents}>
+                            <Text style={eventStyles.titleText}>{props.eventName}</Text>
+                            <Text style={eventStyles.contentsText}>Start: {props.startTime}</Text>
+                            <Text style={eventStyles.contentsText}>End: {props.endTime}</Text>
+                        </View>
+                        <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={eventStyles.contentsImage} resizeMode="cover"/>
                     </View>
-                    <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={eventStyles.contentsImage} resizeMode="cover"/>
+                    <Text style={eventStyles.contentsText}>{props.eventDescription}</Text>
                 </View>
-                <Text style={eventStyles.contentsText}>this is a big test of a long description. i need to see what it looks like when im describing things and allat</Text>
             </View>
-        </View>
+        </Pressable>
     )
 }
 
@@ -171,14 +178,6 @@ const postStyles = StyleSheet.create({
     }
 })
 
-const eventHolderStyles = StyleSheet.create({
-    holder: {
-        backgroundColor: '#50bbc9ff',
-        alignItems: 'center',
-        
-    }
-})
-
 const eventStyles = StyleSheet.create({
     container: {
         alignItems: 'center',
@@ -213,16 +212,7 @@ const eventStyles = StyleSheet.create({
     contentsText: {
         fontSize: 14,
     },
-    leftSideContainer: {
-        
-    },
-    rightSideContainer: {
-        
-    },
     contents: {
         flex:0
-    },
-    descriptionText: {
-        
     }
 })
