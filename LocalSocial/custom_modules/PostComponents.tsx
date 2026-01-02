@@ -17,13 +17,16 @@ export function HomePostHolder(props: HomePostHolderProps) {
         <View style={postHolderStyles.holder}>
             <View style={postHolderStyles.title}>
                 <Text>props.eventName</Text>
-                {props.postList.map(localPost => <PostObject
+                {props.postList.map((localPost, i) => <PostObject
                     authorName={localPost.authorName}
                     postTitle={localPost.postTitle}
                     postBody={localPost.postBody}
                     authorPictureURL={localPost.authorPictureURL}
                     postMediaURL={localPost.postMediaURL}
-                ></PostObject>)}
+                    location={localPost.location}
+                    postID={localPost.postID}
+                    key={i}
+                />)}
             </View>
         </View>
     );
@@ -32,13 +35,16 @@ export function HomePostHolder(props: HomePostHolderProps) {
 export function PostHolder(props: PostHolderProps) {
     return (
         <View>
-            {props.postList.map(localPost => <PostObject
+            {props.postList.map((localPost, i) => <PostObject
                 authorName={localPost.authorName}
                 postTitle={localPost.postTitle}
                 postBody={localPost.postBody}
                 authorPictureURL={localPost.authorPictureURL}
                 postMediaURL={localPost.postMediaURL}
-            ></PostObject>)}
+                location={localPost.location}
+                postID={localPost.postID}
+                key={i}
+            />)}
         </View>
     );
 }
@@ -49,25 +55,35 @@ export type PostProps = {
     postBody: string;
     authorPictureURL: string;
     postMediaURL: string;
+    location: string;
+    postID: number;
 }
 
 export function PostObject(props: PostProps) {
+    const navigation = useNavigation();
+
     return (
-        <View style={postStyles.container}>
-            <View style={postStyles.titleContents}>
-                <Image source={{uri:props.authorPictureURL}} style={postStyles.authorImage} resizeMode="cover"/>
-                <View style={postStyles.titleTextBox}>
-                    <View style={postStyles.titleTextAlign}>
-                        <Text style={postStyles.authorText}>{props.authorName}</Text>
-                        <Text style={postStyles.titleText}>{props.postTitle}</Text>
+        <Pressable onPress={() => navigation.navigate("Post Details", {postID: props.postID})}>
+            <View style={postStyles.container}>
+                <View style={postStyles.titleContents}>
+                    <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={postStyles.authorImage} resizeMode="cover"/>
+                    <View style={postStyles.titleTextBox}>
+                        <View style={postStyles.titleTextAlign}>
+                            <Text style={postStyles.authorText}>{props.authorName}</Text>
+                            <Text style={postStyles.titleText}>{props.postTitle}</Text>
+                        </View>
+                    </View>
+                </View>
+                <View style={postStyles.contents}>
+                    <View style={postStyles.contentImageContainer}>
+                        <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={postStyles.contentsImage} resizeMode="cover"/>
+                    </View>
+                    <View style={postStyles.contentTextContainer}>
+                        <Text style={postStyles.contentsText}>{props.postBody}</Text>
                     </View>
                 </View>
             </View>
-            <View style={postStyles.contents}>
-                <Image source={{uri:props.postMediaURL}} style={postStyles.contentsImage} resizeMode="cover"/>
-                <Text style={postStyles.contentsText}>{props.postBody}</Text>
-            </View>
-        </View>
+        </Pressable>
     )
 }
 
@@ -145,20 +161,21 @@ const postHolderStyles = StyleSheet.create({
 
 const postStyles = StyleSheet.create({
     container: {
-        alignItems: 'center',
-        backgroundColor: '#b6dee5ff',
+        backgroundColor: HolderColour,
         margin:10,
         borderRadius:10,
-        width:'95%'
+        width:'95%',
+        flex:1,
+        height:'auto'
     },
     titleContents: {
         flexDirection:"row",
         alignContent: "space-between",
         alignItems: "flex-start",
         borderRadius:10,
-        margin:10,
-        width:'95%',
         backgroundColor: '#91c7ceff',
+        width:'95%',
+        margin:10
     },
     authorImage: {
         width:50,
@@ -176,11 +193,9 @@ const postStyles = StyleSheet.create({
 
     },
     contents: {
-        flexDirection:"row",
-        alignContent: "space-between",
-        alignItems: "flex-start",
+        flexDirection:'row',
         width:'95%',
-        marginBottom:10
+        margin:10,
     },
     titleTextAlign: {
         justifyContent:"center",
@@ -188,15 +203,20 @@ const postStyles = StyleSheet.create({
         flexDirection:"column"
     },
     contentsImage: {
-        borderRadius:10,
-        maxHeight:100,
-        maxWidth:125,
-        width:'100%',
-        height:'100%',
+        width: undefined,
+        height: undefined,
+        borderRadius:15,
+        flex:1
     },
     contentsText: {
-        flexShrink:1,
-        margin:10
+        marginLeft: 10
+    },
+    contentImageContainer: {
+        width:125,
+        height:100,
+    },
+    contentTextContainer: {
+        
     }
 })
 

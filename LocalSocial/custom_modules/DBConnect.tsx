@@ -61,15 +61,17 @@ export async function ReturnPostLikes(props: PostIDProps) {
 export async function ReturnFullPost(props: PostIDProps) {
     console.log("Returning full post from ID", props.postID);
 
-    const {data, error} = await supabase.from("posts").select("*").eq("post_id", props.postID);
+    const {data, error} = await supabase.rpc("getfullpost", {input_post_id: props.postID});
 
     if (error) {
         console.error("Error fetching post:", error.message);
     } else if (data.length == 0) {
         console.error("Post could not be found");
     } else {
-        console.log(data);
+        return data;
     }
+
+    return [];
 }
 
 type UserIDProps = {
@@ -79,15 +81,17 @@ type UserIDProps = {
 export async function ReturnUserDetails(props: UserIDProps) {
     console.log("Returning user details from ID", props.userID);
 
-    const {data, error} = await supabase.from("users").select("username, profile_picture").eq("user_id", props.userID);
+    const {data, error} = await supabase.from("users").select("username, profile_picture_url").eq("user_id", props.userID);
 
     if (error) {
         console.error("Error fetching user:", error.message);
     } else if (data.length == 0) {
         console.error("User could not be found");
     } else {
-        console.log(data);
+        return data;
     }
+
+    return [];
 }
 
 export async function GetPostsFromUser(props: UserIDProps) {
@@ -98,8 +102,10 @@ export async function GetPostsFromUser(props: UserIDProps) {
     if (error) {
         console.error("Error fetching user posts:", error);
     } else {
-        console.log(data);
+        return data;
     }
+
+    return [];
 }
 
 export async function GetJoinedEvents(props: UserIDProps) {
@@ -112,6 +118,8 @@ export async function GetJoinedEvents(props: UserIDProps) {
     } else {
         return data;
     }
+
+    return [];
 }
 
 type EventIDProps = {
@@ -126,7 +134,7 @@ export async function GetPostsFromEvent(props: EventIDProps) {
     if (error) {
         console.error("Error fetching event posts:", error);
     } else {
-        console.log(data);
+        return data;
     }
 
     return [];
@@ -164,11 +172,12 @@ export async function CreateEvent(props: EventCreationProps) {
 
     if (error) {
         console.error("Error creating event:", error);
-        return false;
     } else {
         console.log("Event created successfully");
         return true;
     }
+
+    return false;
 }
 
 type PostCreationProps = {
@@ -177,18 +186,22 @@ type PostCreationProps = {
     postImageUrl: string;
     authorID: number;
     eventID: number;
+    location: string;
 }
 
 export async function CreatePost(props: PostCreationProps) {
     console.log("Atempting to create post");
 
-    const {error} = await supabase.rpc("createpost", {posttitle: props.postTitle, postbody: props.postBody, postImageUrl: props.postImageUrl, authorid: props.authorID, eventid: props.eventID});
+    const {error} = await supabase.rpc("createpost", {posttitle: props.postTitle, postbody: props.postBody, postimageurl: props.postImageUrl, authorid: props.authorID, eventid: props.eventID, eventlocation: props.location});
 
     if (error) {
         console.error("Error creating post:", error);
     } else {
         console.log("Post created successfully");
+        return true;
     }
+
+    return false;
 }
 
 type EventLeaveJoinProps = {

@@ -13,8 +13,8 @@ type HeaderProps = {
 
 function Header(props: HeaderProps) {
     return (
-        <View style={styles.header}>
-            <Text style={{fontSize:38}}>{props.eventName}</Text>
+        <View>
+            <Text  style={styles.header}>{props.eventName}</Text>
         </View>
     );
 }
@@ -30,18 +30,18 @@ export default function EventPostsScreen(props: GlobalUserIDProps) {
 
     useFocusEffect(useCallback(() => {
         const fetchInfo = async () => {
-            const eventData = await ReturnFullEvent({eventID: localEventID});
+            const postData = await GetPostsFromEvent({eventID: localEventID});
+            
+            if (postData) {
+                const propList = await ConvertPostListToProps(postData);
+                setComponentList(propList);
+            }
 
+            const eventData = await ReturnFullEvent({eventID: localEventID});
             const eventDataProp = ConvertEventDetailsToProp(eventData);
 
             if (eventData) {
                 setEventName(eventDataProp.eventName);
-            }
-
-            const postData = await GetPostsFromEvent({eventID: localEventID});
-            
-            if (postData) {
-                setComponentList(ConvertPostListToProps(postData));
             }
         }
 
@@ -55,11 +55,11 @@ export default function EventPostsScreen(props: GlobalUserIDProps) {
     return (
         <View style={styles.container}>
             <Header eventName={localEventName}/>
-            <ScrollView style={styles.eventHolderContainer}>
+            <ScrollView style={styles.postContainer}>
                 <PostHolder postList={componentList}/>
             </ScrollView>
             <View style={styles.floatingContainer}>
-                <Pressable style={styles.createEventButton} onPress={() => navigation.navigate("Create Post")}>
+                <Pressable style={styles.createPostButton} onPress={() => navigation.navigate("Create Post", {eventID: localEventID})}>
                 </Pressable>
             </View>
         </View>
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: BackgroundColour,
-        alignItems: 'center'
+        alignItems:'center',
     },
 
     floatingContainer: {
@@ -79,22 +79,21 @@ const styles = StyleSheet.create({
         right:16
     },
 
-    createEventButton: {
+    createPostButton: {
         backgroundColor: ButtonColour,
         width: 75,
         height: 75,
         borderRadius: 50,
     },
 
-    eventHolderContainer: {
+    postContainer: {
         width: '90%',
-        marginTop:50
     },
 
     header: {
-        justifyContent: 'center',
-        alignItems: 'center',
+        textAlign:'center',
         paddingTop: 20,
-        paddingBottom: 20
+        paddingBottom: 20,
+        fontSize:36
     }
 })

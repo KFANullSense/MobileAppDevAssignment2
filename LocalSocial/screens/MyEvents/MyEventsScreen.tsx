@@ -8,8 +8,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useCallback, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import CreateEventScreen from "./CreateEventScreen";
+import CreatePostScreen from "./CreatePostScreen";
 import EventPostsScreen from "./EventPostsScreen";
 import FullEventScreen from "./FullEventScreen";
+import FullPostScreen from "./FullPostScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -28,6 +30,8 @@ function RootStack(props:GlobalUserIDProps) {
             <Stack.Screen name="Create Event" children={() => <CreateEventScreen userID={props.userID}/>}/>
             <Stack.Screen name="Event Details" children={() => <FullEventScreen userID={props.userID}/>}/>
             <Stack.Screen name="Event Posts" children={() => <EventPostsScreen userID={props.userID}/>}/>
+            <Stack.Screen name="Create Post" children={() => <CreatePostScreen userID={props.userID}/>}/>
+            <Stack.Screen name="Post Details" children={() => <FullPostScreen userID={props.userID}/>}/>
         </Stack.Navigator>
     )
 }

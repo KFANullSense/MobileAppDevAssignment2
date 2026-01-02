@@ -64,19 +64,29 @@ export function ConvertEventListToProps(inputData: Array<JSON>) {
 export function ConvertEventDetailsToProp(inputData: Array<JSON>) {
     const eventJSON: JSON = inputData[0];
 
-    const returnProp: EventProps = {eventName: eventJSON.event_name, eventDescription: eventJSON.event_description, startTime: eventJSON.event_starttime, endTime: eventJSON.event_endtime, eventID: eventJSON.event_id};
+    const returnProp: EventProps = {eventName: eventJSON.event_name, eventDescription: eventJSON.event_description, startTime: eventJSON.event_starttime, endTime: eventJSON.event_endtime, eventID: eventJSON.event_id, eventLocation: eventJSON.event_location};
 
     return returnProp;
 }
 
-export function ConvertPostListToProps(inputData: Array<JSON>) {
+export async function ConvertPostListToProps(inputData: Array<JSON>) {
     var propList: PostProps[] = [];
 
-    inputData.map(async(localPost) => {
-        const localPostAuthor = await ReturnUserDetails(localPost.user_id);
+    await Promise.all(inputData.map(async (localPost) => {
+        const localPostAuthor = await ReturnUserDetails({userID: localPost.user_id});
 
-        propList.push({postTitle: localPost.post_title, postBody: localPost.post_body, postMediaURL: localPost.post_image_url, authorName: localPostAuthor.username, authorPictureURL: localPostAuthor.profile_picture_url});
-    })
+        propList.push({postTitle: localPost.post_title, postBody: localPost.post_body, postMediaURL: localPost.post_image_url, authorName: localPostAuthor[0].username, authorPictureURL: localPostAuthor[0].profile_picture_url, postID: localPost.post_id, location: localPost.post_location});
+    }));
 
     return propList;
+}
+
+export async function ConvertPostDetailsToProps(inputData: Array<JSON>) {
+    const eventJSON: JSON = inputData[0];
+    console.log(eventJSON);
+    const localPostAuthor = await ReturnUserDetails({userID: eventJSON.user_id});
+
+    const returnProp: PostProps = {postTitle: eventJSON.post_title, postBody: eventJSON.post_body, postMediaURL: eventJSON.post_image_url, authorName: localPostAuthor[0].username, authorPictureURL: localPostAuthor[0].profile_picture_url, postID: eventJSON.post_id, location: eventJSON.post_location};
+
+    return returnProp;
 }
