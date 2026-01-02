@@ -11,7 +11,7 @@ export async function CreateUser(props: UserDetailsProps) {
     const { data: validateData, error: error } = await supabase.from("users").select("username").eq("username", props.username);
 
     if (error) {
-        console.error("Error logging in:", error.message);
+        console.error("Error creating user:", error.message);
     }
     else if (validateData?.length != 0) {
         console.log(validateData?.length);
@@ -21,6 +21,8 @@ export async function CreateUser(props: UserDetailsProps) {
         
         return LogInToUser(props);
     }
+
+    return -1;
 }
 
 export async function LogInToUser(props: UserDetailsProps) {
@@ -31,12 +33,13 @@ export async function LogInToUser(props: UserDetailsProps) {
         console.error("Error logging in:", error.message);
     } else if (data.length == 0) {
         console.error("Could not find a user with those details");
-        return -1;
     }
     else if (data) {
         console.log(data[0].user_id);
         return data[0].user_id;
     }
+
+    return -1;
 }
 
 type PostIDProps = {
@@ -125,10 +128,12 @@ export async function GetPostsFromEvent(props: EventIDProps) {
     } else {
         console.log(data);
     }
+
+    return [];
 }
 
 export async function ReturnFullEvent(props: EventIDProps) {
-    console.log("Returning full post from ID", props.eventID);
+    console.log("Returning full event from ID", props.eventID);
 
     const {data, error} = await supabase.from("events").select("*").eq("event_id", props.eventID);
 
@@ -137,8 +142,10 @@ export async function ReturnFullEvent(props: EventIDProps) {
     } else if (data.length == 0) {
         console.error("Event could not be found");
     } else {
-        console.log(data);
+        return data;
     }
+
+    return [];
 }
 
 type EventCreationProps = {
@@ -184,12 +191,12 @@ export async function CreatePost(props: PostCreationProps) {
     }
 }
 
-type PostLeaveJoinProps = {
+type EventLeaveJoinProps = {
     userID: number;
     eventID: number;
 }
 
-export async function JoinEvent(props: PostLeaveJoinProps) {
+export async function JoinEvent(props: EventLeaveJoinProps) {
     console.log("Attempting to join user", props.userID, "to event", props.eventID);
 
     const {data, error: fetchError} = await supabase.from("events").select("*").eq("event_id", props.eventID); 
@@ -209,7 +216,7 @@ export async function JoinEvent(props: PostLeaveJoinProps) {
     }
 }
 
-export async function LeaveEvent(props: PostLeaveJoinProps) {
+export async function LeaveEvent(props: EventLeaveJoinProps) {
     console.log("Attempting to leave user", props.userID, "from event", props.eventID);
 
     const {data, error: fetchError} = await supabase.from("events").select("*").eq("event_id", props.eventID); 
@@ -226,5 +233,72 @@ export async function LeaveEvent(props: PostLeaveJoinProps) {
         } else {
             console.log("Event left successfully");
         }
+    }
+}
+
+export async function DeleteEvent(props: EventLeaveJoinProps) {
+    console.log("Attempting to delete event", props.eventID);
+
+    const {data, error: fetchError} = await supabase.from("user_events").select("*").eq("event_id", props.eventID).eq("user_id", props.userID).eq("is_host", true); 
+
+    if (fetchError) {
+        console.error("Error fetching event:", fetchError);
+    } else if (data.length == 0) {
+        console.error("Event does not exist or user does not own event!");
+    } else {
+        const {error} = await supabase.from("events").delete().eq("event_id", props.eventID);
+
+        if (error) {
+            console.error("Error deleting event:", error);
+        } else {
+            console.log("Event deleted successfully");
+        }
+    }
+}
+
+type EventIDUserIDProps = {
+    eventID: number;
+    userID: number;
+}
+
+export async function IsUserHostOfEvent(props: EventIDUserIDProps) {
+    console.log("Checking if user", props.userID, "is host of", props.eventID);
+
+    const {count, error} = await supabase.from("user_events").select("*", {count: 'exact', head: true}).eq("user_id", props.userID).eq("event_id", props.eventID).eq("is_host", true);
+
+    if (error) {
+        console.error("Error retrieving user host info:", error.message);
+    } else if (count >= 1) {
+        return true;
+    }
+    return false;
+}
+
+export async function HasUserJoinedEvent(props: EventIDUserIDProps) {
+    console.log("Checking if user", props.userID, "has joined", props.eventID);
+
+    const {count, error} = await supabase.from("user_events").select("*", {count: 'exact', head: true}).eq("user_id", props.userID).eq("event_id", props.eventID);
+
+    if (error) {
+        console.error("Error retrieving user host info:", error.message);
+    } else if (count >= 1) {
+        return true;
+    }
+    return false;
+}
+
+type UserLocationProps = {
+    location: string;
+}
+
+export async function GetNearbyEvents(props:UserLocationProps) {
+    console.log("Finding events nearby", props.location);
+
+    const {data, error} = await supabase.rpc("getnearestevents", {input_location: props.location});
+
+    if (error) {
+        console.error("Error retrieving nearby events:", error.message);
+    } else {
+        return data;
     }
 }

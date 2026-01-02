@@ -1,4 +1,5 @@
-import { CreateUser, LogInToUser } from '@/components/DBConnect';
+import { BackgroundColour, ButtonColour } from '@/custom_modules/Colours';
+import { CreateUser, LogInToUser } from '@/custom_modules/DBConnect';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
@@ -38,7 +39,7 @@ export default function LogInScreen(props: LogInScreenProps) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#b6dee5ff',
+        backgroundColor: BackgroundColour,
     },
     header: {
         justifyContent: 'center',
@@ -55,7 +56,7 @@ const styles = StyleSheet.create({
         margin:5
     },
     loginButton: {
-        backgroundColor: '#ab9dfaff',
+        backgroundColor: ButtonColour,
         width: '80%',
         height: 30,
         alignItems: 'center',

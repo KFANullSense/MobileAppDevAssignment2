@@ -1,3 +1,4 @@
+import { BackgroundColour } from "@/custom_modules/Colours";
 import { StyleSheet, View } from "react-native";
 
 export default function HomeScreen() {
@@ -9,7 +10,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: BackgroundColour,
         alignItems: 'center',
         justifyContent: 'center'
     }

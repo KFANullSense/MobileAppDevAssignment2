@@ -1,3 +1,4 @@
+import { BackgroundColour } from "@/custom_modules/Colours";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 function Header() {
@@ -23,7 +24,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#b6dee5ff',
+        backgroundColor: BackgroundColour,
     },
     header: {
         justifyContent: 'center',

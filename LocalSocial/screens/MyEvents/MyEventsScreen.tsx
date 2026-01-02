@@ -1,12 +1,14 @@
 import { GlobalUserIDProps } from "@/app";
-import { GetJoinedEvents } from "@/components/DBConnect";
-import { ConvertEventListToProps } from "@/components/HelperFunctions";
-import { EventHolder, EventProps } from "@/components/PostComponents";
+import { BackgroundColour, ButtonColour } from "@/custom_modules/Colours";
+import { GetJoinedEvents } from "@/custom_modules/DBConnect";
+import { ConvertEventListToProps } from "@/custom_modules/HelperFunctions";
+import { EventHolder, EventProps } from "@/custom_modules/PostComponents";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useCallback, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import CreateEventScreen from "./CreateEventScreen";
+import EventPostsScreen from "./EventPostsScreen";
 import FullEventScreen from "./FullEventScreen";
 
 const Stack = createNativeStackNavigator();
@@ -24,7 +26,8 @@ function RootStack(props:GlobalUserIDProps) {
         <Stack.Navigator initialRouteName="Root">
             <Stack.Screen name="Root" children={() => <MyEventsScreen userID={props.userID}/>} options= {{headerShown: false}}/>
             <Stack.Screen name="Create Event" children={() => <CreateEventScreen userID={props.userID}/>}/>
-            <Stack.Screen name="View Event" children={() => <FullEventScreen/>}/>
+            <Stack.Screen name="Event Details" children={() => <FullEventScreen userID={props.userID}/>}/>
+            <Stack.Screen name="Event Posts" children={() => <EventPostsScreen userID={props.userID}/>}/>
         </Stack.Navigator>
     )
 }
@@ -71,7 +74,7 @@ export default function RootScreen(props: GlobalUserIDProps) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#b6dee5ff',
+        backgroundColor: BackgroundColour,
         alignItems: 'center'
     },
 
@@ -82,7 +85,7 @@ const styles = StyleSheet.create({
     },
 
     createEventButton: {
-        backgroundColor: '#45b6fe',
+        backgroundColor: ButtonColour,
         width: 75,
         height: 75,
         borderRadius: 50,

@@ -1,12 +1,18 @@
 import { useNavigation } from "@react-navigation/native";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { HolderColour } from "./Colours";
 
-type PostHolderProps = {
+type HomePostHolderProps = {
     eventName: string;
     postList: PostProps[];
 }
 
-export function PostHolder(props: PostHolderProps) {
+
+type PostHolderProps = {
+    postList: PostProps[];
+}
+
+export function HomePostHolder(props: HomePostHolderProps) {
     return (
         <View style={postHolderStyles.holder}>
             <View style={postHolderStyles.title}>
@@ -19,6 +25,20 @@ export function PostHolder(props: PostHolderProps) {
                     postMediaURL={localPost.postMediaURL}
                 ></PostObject>)}
             </View>
+        </View>
+    );
+}
+
+export function PostHolder(props: PostHolderProps) {
+    return (
+        <View>
+            {props.postList.map(localPost => <PostObject
+                authorName={localPost.authorName}
+                postTitle={localPost.postTitle}
+                postBody={localPost.postBody}
+                authorPictureURL={localPost.authorPictureURL}
+                postMediaURL={localPost.postMediaURL}
+            ></PostObject>)}
         </View>
     );
 }
@@ -51,7 +71,7 @@ export function PostObject(props: PostProps) {
     )
 }
 
-type EventHolderProps = {
+export type EventHolderProps = {
     eventList: EventProps[]
 }
 
@@ -64,6 +84,7 @@ export function EventHolder(props: EventHolderProps) {
                 startTime={localEvent.startTime}
                 endTime={localEvent.endTime}
                 eventID={localEvent.eventID}
+                eventLocation={localEvent.eventLocation}
                 key={i}
             />)}
         </View>
@@ -76,18 +97,19 @@ export type EventProps = {
     startTime: string;
     endTime: string;
     eventID: number;
+    eventLocation: string;
 }
 
 export function EventObject(props: EventProps) {
     const navigation = useNavigation();
 
     return (
-        <Pressable onPress={() => navigation.navigate("View Event", {eventID: 1})}>
+        <Pressable onPress={() => navigation.navigate("Event Details", {eventID: props.eventID})}>
             <View style={eventStyles.container}>
                 <View style={eventStyles.contents}>
                     <View style={eventStyles.headerContents}>
                         <View style={eventStyles.titleContents}>
-                            <Text style={eventStyles.titleText}>{props.eventName}</Text>
+                            <Text style={eventStyles.titleText} numberOfLines={1}>{props.eventName}</Text>
                             <Text style={eventStyles.contentsText}>Start: {props.startTime}</Text>
                             <Text style={eventStyles.contentsText}>End: {props.endTime}</Text>
                         </View>
@@ -102,7 +124,7 @@ export function EventObject(props: EventProps) {
 
 const postHolderStyles = StyleSheet.create({
     holder: {
-        backgroundColor: '#50bbc9ff',
+        backgroundColor: HolderColour,
         alignItems: 'center',
         borderRadius: 10,
         marginLeft: 10,
@@ -192,9 +214,11 @@ const eventStyles = StyleSheet.create({
         borderRadius:10,
         padding:5,
         backgroundColor: '#91c7ceff',
+        flexShrink:1,
+        marginRight:10
     },
     titleText: {
-        fontSize: 16
+        fontSize: 16,
     },
     headerContents: {
         flexDirection: 'row',
@@ -213,6 +237,6 @@ const eventStyles = StyleSheet.create({
         fontSize: 14,
     },
     contents: {
-        flex:0
+        
     }
 })

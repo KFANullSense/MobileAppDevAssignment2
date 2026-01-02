@@ -1,6 +1,7 @@
 import { GlobalUserIDProps } from "@/app";
-import { CreateEvent } from "@/components/DBConnect";
-import { ConvertDateTimeForSQL, GetCurrentLocationForSQL } from "@/components/HelperFunctions";
+import { BackgroundColour, ButtonColour } from "@/custom_modules/Colours";
+import { CreateEvent } from "@/custom_modules/DBConnect";
+import { ConvertDateTimeForSQL, GetCurrentLocationForSQL } from "@/custom_modules/HelperFunctions";
 import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
@@ -75,7 +76,7 @@ export default function CreateEventScreen(props: GlobalUserIDProps) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#b6dee5ff',
+        backgroundColor: BackgroundColour,
         alignItems: 'center'
     },
 
@@ -105,14 +106,14 @@ const styles = StyleSheet.create({
     },
 
     createButton: {
-        backgroundColor: '#45b6fe',
+        backgroundColor: ButtonColour,
         width: 75,
         height: 75,
         borderRadius: 50,
     },
 
     dateTimeButton: {
-        backgroundColor: '#45b6fe',
+        backgroundColor: ButtonColour,
         width:'90%',
         padding:15,
         marginTop: 15
