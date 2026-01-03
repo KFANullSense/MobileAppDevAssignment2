@@ -11,10 +11,9 @@ export async function CreateUser(props: UserDetailsProps) {
     const { data: validateData, error: error } = await supabase.from("users").select("username").eq("username", props.username);
 
     if (error) {
-        console.error("Error creating user:", error.message);
+        console.error("Error creating user:", error);
     }
     else if (validateData?.length != 0) {
-        console.log(validateData?.length);
         console.error("User already exists");
     } else {
         await supabase.from("users").insert({ username: props.username, password: props.password, profile_picture_url: "" });
@@ -30,12 +29,11 @@ export async function LogInToUser(props: UserDetailsProps) {
 
     const {data, error} = await supabase.from("users").select("user_id").eq("username", props.username).eq("password", props.password);
     if (error) {
-        console.error("Error logging in:", error.message);
+        console.error("Error logging in:", error);
     } else if (data.length == 0) {
         console.error("Could not find a user with those details");
     }
     else if (data) {
-        console.log(data[0].user_id);
         return data[0].user_id;
     }
 
@@ -49,13 +47,29 @@ type PostIDProps = {
 export async function ReturnPostLikes(props: PostIDProps) {
     console.log("Returning likes count from post", props.postID);
 
-    const {count, error} = await supabase.from("post_likes").select("*", {count: 'exact', head: true});
+    const {count, error} = await supabase.from("post_likes").select("*", {count: 'exact', head: true}).eq("post_id", props.postID);
 
     if (error) {
-        console.error("Error retrieving post likes:", error.message);
+        console.error("Error retrieving post likes:", error);
     } else {
         return count;
     }
+
+    return -1;
+}
+
+export async function ReturnPostComments(props: PostIDProps) {
+    console.log("Returning comments from post", props.postID);
+
+    const {data, error} = await supabase.from("post_comments").select("*").eq("post_id", props.postID).order('post_comment_timestamp', {ascending:false});
+
+    if (error) {
+        console.error("Error retrieving comments from post:", error)
+    } else {
+        return data;
+    }
+
+    return [];
 }
 
 export async function ReturnFullPost(props: PostIDProps) {
@@ -64,7 +78,7 @@ export async function ReturnFullPost(props: PostIDProps) {
     const {data, error} = await supabase.rpc("getfullpost", {input_post_id: props.postID});
 
     if (error) {
-        console.error("Error fetching post:", error.message);
+        console.error("Error fetching post:", error);
     } else if (data.length == 0) {
         console.error("Post could not be found");
     } else {
@@ -84,7 +98,7 @@ export async function ReturnUserDetails(props: UserIDProps) {
     const {data, error} = await supabase.from("users").select("username, profile_picture_url").eq("user_id", props.userID);
 
     if (error) {
-        console.error("Error fetching user:", error.message);
+        console.error("Error fetching user:", error);
     } else if (data.length == 0) {
         console.error("User could not be found");
     } else {
@@ -140,13 +154,27 @@ export async function GetPostsFromEvent(props: EventIDProps) {
     return [];
 }
 
+export async function GetRecentPostsFromEvent(props: EventIDProps) {
+    console.log("Returning post list from event", props.eventID);
+
+    const {data, error} = await supabase.rpc("getrecenteventposts", {input_event_id: props.eventID});
+
+    if (error) {
+        console.error("Error fetching event posts:", error);
+    } else {
+        return data;
+    }
+
+    return [];
+}
+
 export async function ReturnFullEvent(props: EventIDProps) {
     console.log("Returning full event from ID", props.eventID);
 
     const {data, error} = await supabase.from("events").select("*").eq("event_id", props.eventID);
 
     if (error) {
-        console.error("Error fetching event:", error.message);
+        console.error("Error fetching event:", error);
     } else if (data.length == 0) {
         console.error("Event could not be found");
     } else {
@@ -280,7 +308,7 @@ export async function IsUserHostOfEvent(props: EventIDUserIDProps) {
     const {count, error} = await supabase.from("user_events").select("*", {count: 'exact', head: true}).eq("user_id", props.userID).eq("event_id", props.eventID).eq("is_host", true);
 
     if (error) {
-        console.error("Error retrieving user host info:", error.message);
+        console.error("Error retrieving user host info:", error);
     } else if (count >= 1) {
         return true;
     }
@@ -293,7 +321,7 @@ export async function HasUserJoinedEvent(props: EventIDUserIDProps) {
     const {count, error} = await supabase.from("user_events").select("*", {count: 'exact', head: true}).eq("user_id", props.userID).eq("event_id", props.eventID);
 
     if (error) {
-        console.error("Error retrieving user host info:", error.message);
+        console.error("Error retrieving user host info:", error);
     } else if (count >= 1) {
         return true;
     }
@@ -310,8 +338,92 @@ export async function GetNearbyEvents(props:UserLocationProps) {
     const {data, error} = await supabase.rpc("getnearestevents", {input_location: props.location});
 
     if (error) {
-        console.error("Error retrieving nearby events:", error.message);
+        console.error("Error retrieving nearby events:", error);
     } else {
         return data;
     }
+}
+
+type PostCommentProps = {
+    postID: number;
+    userID: number;
+    commentText: string;
+}
+
+export async function CreateComment(props:PostCommentProps) {
+    console.log("Attemping to post comment", props.commentText, "from user", props.userID, "on post", props.postID);
+
+    const {error} = await supabase.rpc("createcomment", {userid: props.userID, postid: props.postID, comment_text: props.commentText});
+
+    if (error) {
+        console.error("Error posting comment:", error);
+    } else {
+        console.log("Comment posted");
+        return true;
+    }
+    return false;
+}
+
+type PostUserProps = {
+    postID: number;
+    userID: number;
+}
+
+export async function HasUserLikedPost(props: PostUserProps) {
+    console.log("Checking if user", props.userID, "has liked post", props.postID);
+
+    const {count, error} = await supabase.from("post_likes").select("*", {count: 'exact', head: true}).eq("user_id", props.userID).eq("post_id", props.postID);
+
+    if (error) {
+        console.error("Error retrieving post like info:", error);
+    } else if (count >= 1) {
+        return true;
+    }
+    return false;
+}
+
+export async function LikePost(props:PostUserProps) {
+    console.log("User", props.userID, "is attempting to like post", props.postID);
+
+    const {data, error: fetchError} = await supabase.from("post_likes").select("*").eq("post_id", props.postID).eq("user_id", props.userID); 
+
+    if (fetchError) {
+        console.error("Error fetching post like:", fetchError);
+    } else if (data.length >= 1) {
+        console.error("User has already liked post");
+    } else {
+        const {error} = await supabase.from("post_likes").insert({ user_id: props.userID, post_id: props.postID});
+
+        if (error) {
+            console.error("Error liking post:", error);
+        } else {
+            console.log("Post liked successfully!");
+            return true;
+        }
+    }
+
+    return false;
+}
+
+export async function UnlikePost(props:PostUserProps) {
+    console.log("User", props.userID, "is attempting to unlike post", props.postID);
+
+    const {data, error: fetchError} = await supabase.from("post_likes").select("*").eq("post_id", props.postID).eq("user_id", props.userID); 
+
+    if (fetchError) {
+        console.error("Error fetching post like:", fetchError);
+    } else if (data.length == 0) {
+        console.error("User has not already liked post");
+    } else {
+        const {error} = await supabase.from("post_likes").delete().eq("user_id", props.userID).eq("post_id", props.postID);
+
+        if (error) {
+            console.error("Error unliking post:", error);
+        } else {
+            console.log("Post unliked successfully!");
+            return true;
+        }
+    }
+
+    return false;
 }

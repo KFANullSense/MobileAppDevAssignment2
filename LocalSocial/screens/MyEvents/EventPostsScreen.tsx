@@ -3,6 +3,7 @@ import { BackgroundColour, ButtonColour } from "@/custom_modules/Colours";
 import { GetPostsFromEvent, ReturnFullEvent } from "@/custom_modules/DBConnect";
 import { ConvertEventDetailsToProp, ConvertPostListToProps } from "@/custom_modules/HelperFunctions";
 import { PostHolder, PostProps } from "@/custom_modules/PostComponents";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -60,6 +61,7 @@ export default function EventPostsScreen(props: GlobalUserIDProps) {
             </ScrollView>
             <View style={styles.floatingContainer}>
                 <Pressable style={styles.createPostButton} onPress={() => navigation.navigate("Create Post", {eventID: localEventID})}>
+                    <FontAwesome5 name="plus" size={30}/>
                 </Pressable>
             </View>
         </View>
@@ -84,6 +86,8 @@ const styles = StyleSheet.create({
         width: 75,
         height: 75,
         borderRadius: 50,
+        alignItems:'center',
+        justifyContent:'center'
     },
 
     postContainer: {

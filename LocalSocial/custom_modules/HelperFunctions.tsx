@@ -1,6 +1,6 @@
 import * as Location from 'expo-location';
-import { ReturnUserDetails } from './DBConnect';
-import { EventProps, PostProps } from './PostComponents';
+import { GetJoinedEvents, GetRecentPostsFromEvent, ReturnUserDetails } from './DBConnect';
+import { CommentProps, EventProps, HomePostHolderProps, PostProps } from './PostComponents';
 
 export function ConvertDateTimeForSQL(inputDate: Date) {
     //get month returns one less, add one to be correct (not sure why only month does this and not the others? oh well)
@@ -70,23 +70,47 @@ export function ConvertEventDetailsToProp(inputData: Array<JSON>) {
 }
 
 export async function ConvertPostListToProps(inputData: Array<JSON>) {
-    var propList: PostProps[] = [];
-
-    await Promise.all(inputData.map(async (localPost) => {
+    const requests = await Promise.all(inputData.map(async (localPost) => {
         const localPostAuthor = await ReturnUserDetails({userID: localPost.user_id});
-
-        propList.push({postTitle: localPost.post_title, postBody: localPost.post_body, postMediaURL: localPost.post_image_url, authorName: localPostAuthor[0].username, authorPictureURL: localPostAuthor[0].profile_picture_url, postID: localPost.post_id, location: localPost.post_location});
+        const localPostProps: PostProps = {postTitle: localPost.post_title, postBody: localPost.post_body, postMediaURL: localPost.post_image_url, authorName: localPostAuthor[0].username, authorPictureURL: localPostAuthor[0].profile_picture_url, postID: localPost.post_id, location: localPost.post_location};
+        return(localPostProps);
     }));
 
-    return propList;
+    return requests;
 }
 
 export async function ConvertPostDetailsToProps(inputData: Array<JSON>) {
     const eventJSON: JSON = inputData[0];
-    console.log(eventJSON);
+
     const localPostAuthor = await ReturnUserDetails({userID: eventJSON.user_id});
 
     const returnProp: PostProps = {postTitle: eventJSON.post_title, postBody: eventJSON.post_body, postMediaURL: eventJSON.post_image_url, authorName: localPostAuthor[0].username, authorPictureURL: localPostAuthor[0].profile_picture_url, postID: eventJSON.post_id, location: eventJSON.post_location};
 
     return returnProp;
+}
+
+export async function ConvertCommentListToProps(inputData: Array<JSON>) {
+    const requests = await Promise.all(inputData.map(async (localComment) => {
+        const localPostAuthor = await ReturnUserDetails({userID: localComment.user_id});
+        const localPostProps: CommentProps = {authorName: localPostAuthor[0].username, authorPictureURL: localPostAuthor[0].profile_picture_url, commentText: localComment.postcomment_text};
+        
+        return localPostProps;
+    }));
+
+    return requests;
+}
+
+export async function RetrieveRecentPostsFromUser(localUserID: number) {
+    const eventData: Array<JSON> = await GetJoinedEvents({userID: localUserID});
+
+    const requests = await Promise.all(eventData.map(async (localEvent) => {
+        const localEventProps = ConvertEventDetailsToProp([localEvent]);
+        const localPostData = await GetRecentPostsFromEvent({eventID: localEventProps.eventID});
+        const localPostPropsList: PostProps[] = await ConvertPostListToProps(localPostData);
+        const localHomePostProps: HomePostHolderProps = {postList: localPostPropsList, eventProps: localEventProps};
+
+        return localHomePostProps;
+    }));
+
+    return requests;
 }

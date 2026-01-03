@@ -2,6 +2,7 @@ import { GlobalUserIDProps } from "@/app";
 import { BackgroundColour, ButtonColour } from "@/custom_modules/Colours";
 import { CreateEvent } from "@/custom_modules/DBConnect";
 import { ConvertDateTimeForSQL, GetCurrentLocationForSQL } from "@/custom_modules/HelperFunctions";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
@@ -67,6 +68,7 @@ export default function CreateEventScreen(props: GlobalUserIDProps) {
             </View>
             <View style={styles.floatingContainer}> 
                 <Pressable style={styles.createButton} onPress={async() => ValidateInput()}>
+                    <FontAwesome style={{marginRight:5}}name="send-o" size={35}/>
                 </Pressable>
             </View>
         </View>
@@ -110,6 +112,8 @@ const styles = StyleSheet.create({
         width: 75,
         height: 75,
         borderRadius: 50,
+        justifyContent:'center',
+        alignItems:'center'
     },
 
     dateTimeButton: {

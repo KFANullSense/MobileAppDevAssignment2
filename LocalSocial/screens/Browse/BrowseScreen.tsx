@@ -19,16 +19,23 @@ export function BrowseScreen(props: GlobalUserIDProps) {
         const fetchCoords = async () => {
             const eventData = await GetCurrentLocationCoords();
 
-            console.log(eventData?.latitude, eventData?.longitude);
+            setLocalCoords({latitude: eventData.latitude, longitude: eventData.longitude})
+
+            mapRef.current.animateCamera({
+                center: {
+                    latitude: eventData.latitude,
+                    longitude: eventData.longitude
+                }
+            })
 
             if (eventData) {
-                console.log("event data", eventData);
-
                 const nearby = await GetNearbyEvents({location: ConvertCoordsForSQL(eventData)});
                 setNearbyEvents(ConvertEventListToProps(nearby));
             } else {
                 console.log("no event data");
             }
+
+
         }
 
         fetchCoords();

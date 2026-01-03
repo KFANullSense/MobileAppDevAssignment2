@@ -1,9 +1,13 @@
 import { useNavigation } from "@react-navigation/native";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { HolderColour } from "./Colours";
+import { BackgroundColour, HolderColour } from "./Colours";
 
-type HomePostHolderProps = {
-    eventName: string;
+type HomePostRootProps = {
+    holderList: HomePostHolderProps[];
+}
+
+export type HomePostHolderProps = {
+    eventProps: EventProps;
     postList: PostProps[];
 }
 
@@ -12,23 +16,39 @@ type PostHolderProps = {
     postList: PostProps[];
 }
 
-export function HomePostHolder(props: HomePostHolderProps) {
+export function HomePostRoot(props: HomePostRootProps) {
     return (
-        <View style={postHolderStyles.holder}>
-            <View style={postHolderStyles.title}>
-                <Text>props.eventName</Text>
-                {props.postList.map((localPost, i) => <PostObject
-                    authorName={localPost.authorName}
-                    postTitle={localPost.postTitle}
-                    postBody={localPost.postBody}
-                    authorPictureURL={localPost.authorPictureURL}
-                    postMediaURL={localPost.postMediaURL}
-                    location={localPost.location}
-                    postID={localPost.postID}
-                    key={i}
-                />)}
-            </View>
+        <View>
+            {props.holderList.map((localHolder, i) => <HomePostHolder
+                eventProps={localHolder.eventProps}
+                postList={localHolder.postList}
+                key={i}
+            />)}
         </View>
+    )
+}
+
+export function HomePostHolder(props: HomePostHolderProps) {
+    const navigation = useNavigation();
+
+    return (
+        <Pressable onPress={() => navigation.navigate("Event Details", {eventID: props.eventProps.eventID})}>
+            <View style={postHolderStyles.holder}>
+                <View style={postHolderStyles.title}>
+                    <Text>{props.eventProps.eventName}</Text>
+                </View>
+                {props.postList.map((localPost, i) => <PostObject
+                        authorName={localPost.authorName}
+                        postTitle={localPost.postTitle}
+                        postBody={localPost.postBody}
+                        authorPictureURL={localPost.authorPictureURL}
+                        postMediaURL={localPost.postMediaURL}
+                        location={localPost.location}
+                        postID={localPost.postID}
+                        key={i}
+                    />)}
+            </View>
+        </Pressable>
     );
 }
 
@@ -69,8 +89,8 @@ export function PostObject(props: PostProps) {
                     <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={postStyles.authorImage} resizeMode="cover"/>
                     <View style={postStyles.titleTextBox}>
                         <View style={postStyles.titleTextAlign}>
-                            <Text style={postStyles.authorText}>{props.authorName}</Text>
-                            <Text style={postStyles.titleText}>{props.postTitle}</Text>
+                            <Text style={postStyles.authorText} numberOfLines={1}>{props.authorName}</Text>
+                            <Text style={postStyles.titleText} numberOfLines={1}>{props.postTitle}</Text>
                         </View>
                     </View>
                 </View>
@@ -138,15 +158,48 @@ export function EventObject(props: EventProps) {
     )
 }
 
+export type CommentHolderProps = {
+    commentList: CommentProps[]
+}
+
+export function CommentHolder(props: CommentHolderProps) {
+    return (
+        <View>
+            {props.commentList.map((localComment, i) => <CommentObject
+                authorName={localComment.authorName}
+                authorPictureURL={localComment.authorPictureURL}
+                commentText={localComment.commentText}
+                key={i}
+            />)}
+        </View>
+    )
+}
+
+export type CommentProps = {
+    authorName: string;
+    authorPictureURL: string;
+    commentText: string;
+}
+
+export function CommentObject(props: CommentProps) {
+    return (
+        <View style={commentStyles.container}>
+            <View style={commentStyles.contentRow}>
+                <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={commentStyles.authorImage} resizeMode="cover"/>
+                <View style={commentStyles.textColumn}>
+                    <Text>{props.authorName}</Text>
+                    <Text style={commentStyles.commentText}>{props.commentText}</Text>
+                </View>
+            </View>
+        </View>
+    )
+}
+
 const postHolderStyles = StyleSheet.create({
     holder: {
-        backgroundColor: HolderColour,
-        alignItems: 'center',
+        backgroundColor: BackgroundColour,
         borderRadius: 10,
-        marginLeft: 10,
-        marginRight: 10,
-        marginTop: 10,
-        paddingBottom: 20
+        margin:10
     },
     title: {
         backgroundColor: '#fff',
@@ -166,7 +219,6 @@ const postStyles = StyleSheet.create({
         borderRadius:10,
         width:'95%',
         flex:1,
-        height:'auto'
     },
     titleContents: {
         flexDirection:"row",
@@ -175,7 +227,7 @@ const postStyles = StyleSheet.create({
         borderRadius:10,
         backgroundColor: '#91c7ceff',
         width:'95%',
-        margin:10
+        margin:10,
     },
     authorImage: {
         width:50,
@@ -184,10 +236,11 @@ const postStyles = StyleSheet.create({
         margin:10
     },
     titleTextBox: {
-        margin:5
+        margin:5,
+        flexShrink:1
     },
     titleText: {
-        fontSize: 24
+        fontSize: 22,
     },
     authorText: {
 
@@ -200,7 +253,7 @@ const postStyles = StyleSheet.create({
     titleTextAlign: {
         justifyContent:"center",
         alignItems:"flex-start",
-        flexDirection:"column"
+        flexDirection:"column",
     },
     contentsImage: {
         width: undefined,
@@ -258,5 +311,32 @@ const eventStyles = StyleSheet.create({
     },
     contents: {
         
+    }
+})
+
+const commentStyles = StyleSheet.create({
+    container: {
+        backgroundColor:BackgroundColour,
+        margin:5,
+        borderRadius:10,
+    },
+    authorName: {
+        marginLeft:5,
+        marginTop:5
+    },
+    contentRow: {
+        flexDirection: 'row',
+    },
+    commentText: {
+        
+    },
+    authorImage: {
+        width:30,
+        height:30, 
+        borderRadius:40,
+        margin:10
+    },
+    textRow: {
+
     }
 })

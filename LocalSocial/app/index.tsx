@@ -44,7 +44,7 @@ const TabNav = (props: GlobalUserIDProps) => {
       />
       <Tab.Screen
       name = "Home"
-      component = {HomeScreen}
+      children = {() => <HomeScreen userID={props.userID}/>}
       options = {{
         tabBarIcon: ({color, size}) => (
           <MaterialCommunityIcons
@@ -68,7 +68,7 @@ const TabNav = (props: GlobalUserIDProps) => {
       />
       <Tab.Screen
       name = "Browse"
-      component = {BrowseScreen}
+      children = {() => <BrowseScreen userID={props.userID}/>}
       options = {{
         tabBarIcon: ({color, size}) => (
           <FontAwesome5

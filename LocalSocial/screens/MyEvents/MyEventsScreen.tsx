@@ -3,6 +3,7 @@ import { BackgroundColour, ButtonColour } from "@/custom_modules/Colours";
 import { GetJoinedEvents } from "@/custom_modules/DBConnect";
 import { ConvertEventListToProps } from "@/custom_modules/HelperFunctions";
 import { EventHolder, EventProps } from "@/custom_modules/PostComponents";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useCallback, useState } from "react";
@@ -63,6 +64,7 @@ function MyEventsScreen(props: GlobalUserIDProps) {
             </ScrollView>
             <View style={styles.floatingContainer}>
                 <Pressable style={styles.createEventButton} onPress={() => navigation.navigate("Create Event")}>
+                    <FontAwesome5 name="plus" size={30}/>
                 </Pressable>
             </View>
         </View>
@@ -93,6 +95,8 @@ const styles = StyleSheet.create({
         width: 75,
         height: 75,
         borderRadius: 50,
+        alignItems:'center',
+        justifyContent:'center'
     },
 
     eventHolderContainer: {
