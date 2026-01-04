@@ -95,7 +95,7 @@ type UserIDProps = {
 export async function ReturnUserDetails(props: UserIDProps) {
     console.log("Returning user details from ID", props.userID);
 
-    const {data, error} = await supabase.from("users").select("username, profile_picture_url").eq("user_id", props.userID);
+    const {data, error} = await supabase.from("users").select("*").eq("user_id", props.userID);
 
     if (error) {
         console.error("Error fetching user:", error);
@@ -161,6 +161,20 @@ export async function GetRecentPostsFromEvent(props: EventIDProps) {
 
     if (error) {
         console.error("Error fetching event posts:", error);
+    } else {
+        return data;
+    }
+
+    return [];
+}
+
+export async function GetRecentPostsFromEventByUser(props: EventIDUserIDProps) {
+    console.log("Returning post list from event", props.eventID, "by user", props.userID);
+
+    const {data, error} = await supabase.rpc("getrecenteventpostsfromuser", {input_event_id: props.eventID, input_user_id: props.userID});
+
+    if (error) {
+        console.error("Error fetching posts:", error);
     } else {
         return data;
     }

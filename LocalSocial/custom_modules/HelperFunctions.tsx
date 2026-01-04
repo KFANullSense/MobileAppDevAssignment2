@@ -1,6 +1,7 @@
+import { ProfileProps } from '@/screens/Profile/FullProfileScreen';
 import * as Location from 'expo-location';
 import getDistance from 'geolib/es/getDistance';
-import { GetJoinedEvents, GetRecentPostsFromEvent, ReturnUserDetails } from './DBConnect';
+import { GetJoinedEvents, GetRecentPostsFromEvent, GetRecentPostsFromEventByUser, ReturnUserDetails } from './DBConnect';
 import { CommentProps, EventProps, HomePostHolderProps, PostProps } from './PostComponents';
 
 export function ConvertDateTimeForSQL(inputDate: Date) {
@@ -87,13 +88,13 @@ export async function ConvertPostListToProps(inputData: Array<JSON>) {
 }
 
 export async function ConvertPostDetailsToProps(inputData: Array<JSON>) {
-    const eventJSON: JSON = inputData[0];
+    const profileJSON: JSON = inputData[0];
 
     const localUserLocation = await GetCurrentLocationCoords();
 
-    const localPostAuthor = await ReturnUserDetails({userID: eventJSON.user_id});
+    const localPostAuthor = await ReturnUserDetails({userID: profileJSON.user_id});
 
-    const returnProp: PostProps = {postTitle: eventJSON.post_title, postBody: eventJSON.post_body, postMediaURL: eventJSON.post_image_url, authorName: localPostAuthor[0].username, authorPictureURL: localPostAuthor[0].profile_picture_url, postID: eventJSON.post_id, location: eventJSON.post_location, userLocation: localUserLocation};
+    const returnProp: PostProps = {postTitle: profileJSON.post_title, postBody: profileJSON.post_body, postMediaURL: profileJSON.post_image_url, authorName: localPostAuthor[0].username, authorPictureURL: localPostAuthor[0].profile_picture_url, postID: profileJSON.post_id, location: profileJSON.post_location, userLocation: localUserLocation};
 
     return returnProp;
 }
@@ -109,7 +110,7 @@ export async function ConvertCommentListToProps(inputData: Array<JSON>) {
     return requests;
 }
 
-export async function RetrieveRecentPostsFromUser(localUserID: number) {
+export async function RetrieveRecentPostsForUser(localUserID: number) {
     const eventData: Array<JSON> = await GetJoinedEvents({userID: localUserID});
 
     const localUserLocation = await GetCurrentLocationCoords();
@@ -117,6 +118,27 @@ export async function RetrieveRecentPostsFromUser(localUserID: number) {
     const requests = await Promise.all(eventData.map(async (localEvent) => {
         const localEventProps = ConvertEventDetailsToProp([localEvent]);
         const localPostData = await GetRecentPostsFromEvent({eventID: localEventProps.eventID});
+        const localPostPropsList: PostProps[] = await ConvertPostListToProps(localPostData);
+        const localHomePostProps: HomePostHolderProps = {postList: localPostPropsList, eventProps: localEventProps, userLocation: localUserLocation};
+
+        return localHomePostProps;
+    }));
+
+    return requests;
+}
+
+export async function RetrieveRecentPostsByUser(localUserID: number) {
+    const eventData: Array<JSON> = await GetJoinedEvents({userID: localUserID});
+
+    const localUserLocation = await GetCurrentLocationCoords();
+
+    const requests = await Promise.all(eventData.map(async (localEvent) => {
+        const localEventProps = ConvertEventDetailsToProp([localEvent]);
+        const localPostData = await GetRecentPostsFromEventByUser({eventID: localEventProps.eventID, userID: localUserID});
+        if (localPostData.length == 0) {
+            return [];
+        }
+
         const localPostPropsList: PostProps[] = await ConvertPostListToProps(localPostData);
         const localHomePostProps: HomePostHolderProps = {postList: localPostPropsList, eventProps: localEventProps, userLocation: localUserLocation};
 
@@ -144,4 +166,12 @@ export function CheckDistance(props: CheckDistanceProps) {
     
     console.log("Close enough to event to interact!");
     return true;
+}
+
+export function ConvertProfileDetailsToProps(inputData: Array<JSON>) {
+    const profileJSON: JSON = inputData[0];
+
+    const returnProp: ProfileProps = {username: profileJSON.username, profilePictureURL: profileJSON.profile_picture_url, userStatus: profileJSON.user_status, profileID: profileJSON.user_id};
+
+    return returnProp;
 }

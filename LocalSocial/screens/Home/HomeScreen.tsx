@@ -1,6 +1,6 @@
 import { GlobalUserIDProps } from "@/app";
 import { BackgroundColour } from "@/custom_modules/Colours";
-import { GetCurrentLocationCoords, LocationHolder, RetrieveRecentPostsFromUser } from "@/custom_modules/HelperFunctions";
+import { RetrieveRecentPostsForUser } from "@/custom_modules/HelperFunctions";
 import { HomePostHolderProps, HomePostRoot } from "@/custom_modules/PostComponents";
 import { useFocusEffect } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -35,19 +35,13 @@ function RootStack(props:GlobalUserIDProps) {
 
 export function HomeScreen(props: GlobalUserIDProps) {
     const [holderData, setHolderData] = useState<HomePostHolderProps[]>([]);
-    const [currentLocation, setCurrentLocation] = useState<LocationHolder>(null);
 
     useFocusEffect(useCallback(() => {
         const fetchData = async () => {
-            const localHolderData = await RetrieveRecentPostsFromUser(props.userID);
+            const localHolderData = await RetrieveRecentPostsForUser(props.userID);
             
             if (localHolderData) {
                 setHolderData(localHolderData);
-            }
-
-            const currLocation = await GetCurrentLocationCoords();
-            if (currLocation) {
-                setCurrentLocation(currLocation);
             }
         }
 
@@ -70,7 +64,7 @@ export function HomeScreen(props: GlobalUserIDProps) {
             <View style={styles.container}>
                 <Header/>
                 <ScrollView>
-                    <HomePostRoot holderList={holderData} userLocation={currentLocation}/>
+                    <HomePostRoot holderList={holderData}/>
                 </ScrollView>
             </View>
         )

@@ -20,7 +20,7 @@ const TabNav = (props: GlobalUserIDProps) => {
     <Tab.Navigator initialRouteName="Home" screenOptions={{headerShown: false}}>
       <Tab.Screen
       name = "Profile"
-      component = {MyProfileScreen}
+      children = {() => <MyProfileScreen userID={props.userID}/>}
       options = {{
         tabBarIcon: ({color, size}) => (
           <FontAwesome
@@ -32,7 +32,7 @@ const TabNav = (props: GlobalUserIDProps) => {
       />
       <Tab.Screen
       name = "Friends"
-      component = {FriendsScreen}
+      children = {() => <FriendsScreen userID={props.userID}/>}
       options = {{
         tabBarIcon: ({color, size}) => (
           <FontAwesome

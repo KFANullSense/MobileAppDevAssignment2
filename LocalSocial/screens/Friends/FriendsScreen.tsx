@@ -1,7 +1,8 @@
+import { GlobalUserIDProps } from "@/app";
 import { BackgroundColour } from "@/custom_modules/Colours";
 import { StyleSheet, View } from "react-native";
 
-export default function HomeScreen() {
+export default function FriendsScreen(props: GlobalUserIDProps) {
     return (
         <View style={styles.container}></View>
     )
