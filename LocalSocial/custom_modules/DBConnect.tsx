@@ -253,8 +253,11 @@ export async function JoinEvent(props: EventLeaveJoinProps) {
             console.error("Error joining event:", error);
         } else {
             console.log("Event joined successfully");
+            return true;
         }
     }
+    
+    return false;
 }
 
 export async function LeaveEvent(props: EventLeaveJoinProps) {
@@ -273,8 +276,11 @@ export async function LeaveEvent(props: EventLeaveJoinProps) {
             console.error("Error leaving event:", error);
         } else {
             console.log("Event left successfully");
+            return true;
         }
     }
+
+    return false;
 }
 
 export async function DeleteEvent(props: EventLeaveJoinProps) {
@@ -293,8 +299,11 @@ export async function DeleteEvent(props: EventLeaveJoinProps) {
             console.error("Error deleting event:", error);
         } else {
             console.log("Event deleted successfully");
+            return true;
         }
     }
+
+    return false;
 }
 
 type EventIDUserIDProps = {

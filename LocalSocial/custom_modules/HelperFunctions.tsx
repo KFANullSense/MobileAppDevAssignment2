@@ -1,4 +1,5 @@
 import * as Location from 'expo-location';
+import getDistance from 'geolib/es/getDistance';
 import { GetJoinedEvents, GetRecentPostsFromEvent, ReturnUserDetails } from './DBConnect';
 import { CommentProps, EventProps, HomePostHolderProps, PostProps } from './PostComponents';
 
@@ -12,17 +13,21 @@ export type LocationHolder = {
     longitude: number;
 }
 
-export async function GetCurrentLocationCoords(): Promise<LocationHolder | null> {
+export async function GetCurrentLocationCoords(): Promise<LocationHolder> {
     console.log("Attempting to get location");
 
     const {status} = await Location.requestForegroundPermissionsAsync();
     if (status != 'granted') {
         console.error("Permission to use location was denied");
-        return null;
+        return {latitude: 0, longitude: 0};
     }
 
     const location = await Location.getCurrentPositionAsync({accuracy: Location.LocationAccuracy.High});
-    return {latitude: location.coords.latitude, longitude: location.coords.longitude}
+    if (location) {
+        return {latitude: location.coords.latitude, longitude: location.coords.longitude};
+    }
+
+    return {latitude: 0, longitude: 0};
 }
 
 export function ConvertCoordsForSQL(inputCoords: LocationHolder) {
@@ -70,9 +75,11 @@ export function ConvertEventDetailsToProp(inputData: Array<JSON>) {
 }
 
 export async function ConvertPostListToProps(inputData: Array<JSON>) {
+    const localUserLocation = await GetCurrentLocationCoords();
+
     const requests = await Promise.all(inputData.map(async (localPost) => {
         const localPostAuthor = await ReturnUserDetails({userID: localPost.user_id});
-        const localPostProps: PostProps = {postTitle: localPost.post_title, postBody: localPost.post_body, postMediaURL: localPost.post_image_url, authorName: localPostAuthor[0].username, authorPictureURL: localPostAuthor[0].profile_picture_url, postID: localPost.post_id, location: localPost.post_location};
+        const localPostProps: PostProps = {postTitle: localPost.post_title, postBody: localPost.post_body, postMediaURL: localPost.post_image_url, authorName: localPostAuthor[0].username, authorPictureURL: localPostAuthor[0].profile_picture_url, postID: localPost.post_id, location: localPost.post_location, userLocation: localUserLocation};
         return(localPostProps);
     }));
 
@@ -82,19 +89,21 @@ export async function ConvertPostListToProps(inputData: Array<JSON>) {
 export async function ConvertPostDetailsToProps(inputData: Array<JSON>) {
     const eventJSON: JSON = inputData[0];
 
+    const localUserLocation = await GetCurrentLocationCoords();
+
     const localPostAuthor = await ReturnUserDetails({userID: eventJSON.user_id});
 
-    const returnProp: PostProps = {postTitle: eventJSON.post_title, postBody: eventJSON.post_body, postMediaURL: eventJSON.post_image_url, authorName: localPostAuthor[0].username, authorPictureURL: localPostAuthor[0].profile_picture_url, postID: eventJSON.post_id, location: eventJSON.post_location};
+    const returnProp: PostProps = {postTitle: eventJSON.post_title, postBody: eventJSON.post_body, postMediaURL: eventJSON.post_image_url, authorName: localPostAuthor[0].username, authorPictureURL: localPostAuthor[0].profile_picture_url, postID: eventJSON.post_id, location: eventJSON.post_location, userLocation: localUserLocation};
 
     return returnProp;
 }
 
 export async function ConvertCommentListToProps(inputData: Array<JSON>) {
     const requests = await Promise.all(inputData.map(async (localComment) => {
-        const localPostAuthor = await ReturnUserDetails({userID: localComment.user_id});
-        const localPostProps: CommentProps = {authorName: localPostAuthor[0].username, authorPictureURL: localPostAuthor[0].profile_picture_url, commentText: localComment.postcomment_text};
+        const localCommentAuthor = await ReturnUserDetails({userID: localComment.user_id});
+        const localCommentProps: CommentProps = {authorName: localCommentAuthor[0].username, authorPictureURL: localCommentAuthor[0].profile_picture_url, commentText: localComment.postcomment_text};
         
-        return localPostProps;
+        return localCommentProps;
     }));
 
     return requests;
@@ -103,14 +112,36 @@ export async function ConvertCommentListToProps(inputData: Array<JSON>) {
 export async function RetrieveRecentPostsFromUser(localUserID: number) {
     const eventData: Array<JSON> = await GetJoinedEvents({userID: localUserID});
 
+    const localUserLocation = await GetCurrentLocationCoords();
+
     const requests = await Promise.all(eventData.map(async (localEvent) => {
         const localEventProps = ConvertEventDetailsToProp([localEvent]);
         const localPostData = await GetRecentPostsFromEvent({eventID: localEventProps.eventID});
         const localPostPropsList: PostProps[] = await ConvertPostListToProps(localPostData);
-        const localHomePostProps: HomePostHolderProps = {postList: localPostPropsList, eventProps: localEventProps};
+        const localHomePostProps: HomePostHolderProps = {postList: localPostPropsList, eventProps: localEventProps, userLocation: localUserLocation};
 
         return localHomePostProps;
     }));
 
     return requests;
+}
+
+type CheckDistanceProps = {
+    startLocation: LocationHolder;
+    endLocation: LocationHolder;
+}
+
+export function CheckDistance(props: CheckDistanceProps) {
+    const maxRange = 500;
+
+    const distance = getDistance({latitude: props.startLocation.latitude, longitude: props.startLocation.longitude}, {latitude: props.endLocation.latitude, longitude: props.endLocation.longitude});
+    console.log("Distance to event:", distance);
+    
+    if (distance > maxRange) {
+        console.log("Too far from event, can't interact");
+        return false;
+    }
+    
+    console.log("Close enough to event to interact!");
+    return true;
 }

@@ -1,6 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { BackgroundColour, HolderColour } from "./Colours";
+import { LocationHolder } from "./HelperFunctions";
 
 type HomePostRootProps = {
     holderList: HomePostHolderProps[];
@@ -9,19 +10,23 @@ type HomePostRootProps = {
 export type HomePostHolderProps = {
     eventProps: EventProps;
     postList: PostProps[];
+    userLocation: LocationHolder;
 }
 
 
 type PostHolderProps = {
     postList: PostProps[];
+    userLocation: LocationHolder;
 }
 
 export function HomePostRoot(props: HomePostRootProps) {
     return (
         <View>
-            {props.holderList.map((localHolder, i) => <HomePostHolder
+            {props.holderList.map((localHolder, i) =>
+                <HomePostHolder
                 eventProps={localHolder.eventProps}
                 postList={localHolder.postList}
+                userLocation={localHolder.userLocation}
                 key={i}
             />)}
         </View>
@@ -45,6 +50,7 @@ export function HomePostHolder(props: HomePostHolderProps) {
                         postMediaURL={localPost.postMediaURL}
                         location={localPost.location}
                         postID={localPost.postID}
+                        userLocation={localPost.userLocation}
                         key={i}
                     />)}
             </View>
@@ -63,6 +69,7 @@ export function PostHolder(props: PostHolderProps) {
                 postMediaURL={localPost.postMediaURL}
                 location={localPost.location}
                 postID={localPost.postID}
+                userLocation={localPost.userLocation}
                 key={i}
             />)}
         </View>
@@ -77,13 +84,14 @@ export type PostProps = {
     postMediaURL: string;
     location: string;
     postID: number;
+    userLocation: LocationHolder;
 }
 
 export function PostObject(props: PostProps) {
     const navigation = useNavigation();
 
     return (
-        <Pressable onPress={() => navigation.navigate("Post Details", {postID: props.postID})}>
+        <Pressable onPress={() => navigation.navigate("Post Details", {postID: props.postID, userLocation: props.userLocation})}>
             <View style={postStyles.container}>
                 <View style={postStyles.titleContents}>
                     <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={postStyles.authorImage} resizeMode="cover"/>

@@ -1,7 +1,7 @@
 import { GlobalUserIDProps } from "@/app";
 import { BackgroundColour, ButtonColour, HolderColour } from "@/custom_modules/Colours";
 import { DeleteEvent, HasUserJoinedEvent, IsUserHostOfEvent, JoinEvent, LeaveEvent, ReturnFullEvent } from "@/custom_modules/DBConnect";
-import { ConvertEventDetailsToProp } from "@/custom_modules/HelperFunctions";
+import { CheckDistance, ConvertEventDetailsToProp, ConvertSQLCoordsToNumber, GetCurrentLocationCoords } from "@/custom_modules/HelperFunctions";
 import { EventProps } from "@/custom_modules/PostComponents";
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import { useCallback, useState } from "react";
@@ -14,26 +14,28 @@ export default function FullEventScreen(props: GlobalUserIDProps) {
 
     const [eventDetails, setEventDetails] = useState<EventProps>();
     const [isHost, setIsHost] = useState(false);
-    const [userJoinedEvent, setUserJoinedEvent] = useState(false);
+    const [withinRange, setWithinRange] = useState(false);
     
     useFocusEffect(useCallback(() => {
-            const fetchData = async () => {
-                const eventData = await ReturnFullEvent({eventID: localEventID});
-                setEventDetails(ConvertEventDetailsToProp(eventData));
+        const fetchData = async () => {
+            const eventData = await ReturnFullEvent({eventID: localEventID});
+            const eventProps = ConvertEventDetailsToProp(eventData);
+            setEventDetails(eventProps);
 
-                const isHostInfo = await IsUserHostOfEvent({eventID: localEventID, userID: props.userID});
-                setIsHost(isHostInfo);
-                
-                const hasJoinedInfo = await HasUserJoinedEvent({eventID: localEventID, userID: props.userID});
-                setUserJoinedEvent(hasJoinedInfo);
-            }
+            const isHostInfo = await IsUserHostOfEvent({eventID: localEventID, userID: props.userID});
+            setIsHost(isHostInfo);
 
-            fetchData();
+            const currLocation = await GetCurrentLocationCoords();
+            const rangeCheck = CheckDistance({startLocation: currLocation, endLocation: ConvertSQLCoordsToNumber(eventProps.eventLocation)});
+            setWithinRange(rangeCheck);
+        }
 
-            return () => {
+        fetchData();
 
-            }
-        }, []));
+        return () => {
+
+        }
+    }, []));
 
     // useEffect(()  => {
     //     navigation.setOptions({title: eventDetails?.eventName});
@@ -52,30 +54,65 @@ export default function FullEventScreen(props: GlobalUserIDProps) {
                 <View style={styles.eventInfoBox}>
                     <Text style={styles.eventInfoText}>{eventDetails?.eventDescription}</Text>
                 </View>
-                <ButtonHolder HasJoinedEvent={userJoinedEvent} IsHost={isHost} UserID={props.userID} EventID={localEventID}/>
+                <ButtonHolder IsHost={isHost} UserID={props.userID} EventID={localEventID} WithinRange={withinRange}/>
             </ScrollView>
         </View>
     )
 }
 
 type ButtonHolderProps = {
-    HasJoinedEvent: boolean;
     IsHost: boolean;
     EventID: number;
     UserID: number;
+    WithinRange: boolean;
 }
 
 function ButtonHolder (props: ButtonHolderProps) {
     const navigation = useNavigation();
 
-    if (props.HasJoinedEvent) {
+    const [localHasJoinedEvent, setLocalHasJoinedEvent] = useState(false);
+    
+    useFocusEffect(useCallback(() => {
+        const fetchData = async () => {
+            const hasJoinedInfo = await HasUserJoinedEvent({eventID: props.EventID, userID: props.UserID});
+            setLocalHasJoinedEvent(hasJoinedInfo);
+        }
+
+        fetchData();
+
+        return () => {
+
+        }
+    }, []));
+
+    async function JoinEventButton() {
+        const result = await JoinEvent({eventID: props.EventID, userID: props.UserID});
+
+        if (result) {
+            setLocalHasJoinedEvent(true);
+        }
+    }
+
+    async function LeaveEventButton() {
+        const result = await LeaveEvent({eventID: props.EventID, userID: props.UserID});
+        if (result) {
+            setLocalHasJoinedEvent(false);
+        }
+    }
+
+    async function DeleteEventButton() {
+        await DeleteEvent({eventID: props.EventID, userID: props.UserID});
+        navigation.goBack();
+    }
+
+    if (localHasJoinedEvent) {
         if (props.IsHost) {
             return (
                 <View style={styles.eventButtonHolder}>
                     <Pressable style={styles.eventButtons} onPress={() => {navigation.navigate("Event Posts", {eventID: props.EventID})}}>
                         <Text style={styles.buttonText}>View Posts</Text>
                     </Pressable>
-                    <Pressable style={styles.eventButtons} onPress={async() => {await DeleteEvent({eventID: props.EventID, userID: props.UserID}); navigation.goBack();}}>
+                    <Pressable style={styles.eventButtons} onPress={async() => {DeleteEventButton()}}>
                         <Text style={styles.buttonText}>Delete Event</Text>
                     </Pressable>
                 </View>
@@ -87,17 +124,27 @@ function ButtonHolder (props: ButtonHolderProps) {
                         <Text style={styles.buttonText}>View Posts</Text>
                     </Pressable>
                     <Pressable style={styles.eventButtons}>
-                        <Text style={styles.buttonText} onPress={async() => {await LeaveEvent({eventID: props.EventID, userID: props.UserID}); navigation.goBack();}}>Leave Event</Text>
+                        <Text style={styles.buttonText} onPress={async() => {LeaveEventButton()}}>Leave Event</Text>
                     </Pressable>
                 </View>
             )
         }
     } else {
-        <View style={styles.eventButtonHolder}>
-            <Pressable style={styles.eventButtons}>
-                <Text style={styles.buttonText} onPress={async() => {await JoinEvent({eventID: props.EventID, userID: props.UserID}); navigation.goBack();}}>Join Event</Text>
-            </Pressable>
-        </View>
+        if (props.WithinRange) {
+            return (
+                <View style={styles.eventButtonHolder}>
+                    <Pressable style={styles.eventButtons}>
+                        <Text style={styles.buttonText} onPress={async() => {JoinEventButton()}}>Join Event</Text>
+                    </Pressable>
+                </View>
+            )
+        } else {
+            return (
+                <View style={styles.eventButtonHolder}>
+                    <Text>Not close enough to join event.</Text>
+                </View>
+            )
+        }
     }
 }
 

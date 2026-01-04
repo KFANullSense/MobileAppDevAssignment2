@@ -3,12 +3,16 @@ import { BackgroundColour } from "@/custom_modules/Colours";
 import { GetNearbyEvents } from "@/custom_modules/DBConnect";
 import { ConvertCoordsForSQL, ConvertEventListToProps, ConvertSQLCoordsToNumber, GetCurrentLocationCoords, LocationHolder } from "@/custom_modules/HelperFunctions";
 import { EventHolderProps, EventProps } from "@/custom_modules/PostComponents";
+import { useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import MapView, { Marker } from 'react-native-maps';
+import CreatePostScreen from "../MyEvents/CreatePostScreen";
+import EventPostsScreen from "../MyEvents/EventPostsScreen";
 import FullEventScreen from "../MyEvents/FullEventScreen";
+import FullPostScreen from "../MyEvents/FullPostScreen";
 
 export function BrowseScreen(props: GlobalUserIDProps) {
     const [localCoords, setLocalCoords] = useState<LocationHolder>({latitude:0, longitude:0});
@@ -68,7 +72,7 @@ export function BrowseScreen(props: GlobalUserIDProps) {
 }
 
 export function EventMarkers(props: EventHolderProps) {
-    console.log(props.eventList);
+    const navigation = useNavigation();
 
     return (props.eventList.map((localEvent, i) =>
         <Marker
@@ -79,6 +83,7 @@ export function EventMarkers(props: EventHolderProps) {
             }}
             title={localEvent.eventName}
             description={localEvent.eventDescription}
+            onCalloutPress={() => navigation.navigate("Event Details", {eventID: localEvent.eventID})}
         />)
     )
 }
@@ -92,6 +97,9 @@ function RootStack(props:GlobalUserIDProps) {
         <Stack.Navigator initialRouteName="Root">
             <Stack.Screen name="Root" children={() => <BrowseScreen userID={props.userID}/>} options= {{headerShown: false}}/>
             <Stack.Screen name="Event Details" children={() => <FullEventScreen userID={props.userID}/>}/>
+            <Stack.Screen name="Event Posts" children={() => <EventPostsScreen userID={props.userID}/>}/>
+            <Stack.Screen name="Create Post" children={() => <CreatePostScreen userID={props.userID}/>}/>
+            <Stack.Screen name="Post Details" children={() => <FullPostScreen userID={props.userID}/>}/>
         </Stack.Navigator>
     )
 }

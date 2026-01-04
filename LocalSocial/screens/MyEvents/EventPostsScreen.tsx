@@ -1,8 +1,9 @@
 import { GlobalUserIDProps } from "@/app";
 import { BackgroundColour, ButtonColour } from "@/custom_modules/Colours";
 import { GetPostsFromEvent, ReturnFullEvent } from "@/custom_modules/DBConnect";
-import { ConvertEventDetailsToProp, ConvertPostListToProps } from "@/custom_modules/HelperFunctions";
+import { CheckDistance, ConvertEventDetailsToProp, ConvertPostListToProps, ConvertSQLCoordsToNumber, GetCurrentLocationCoords, LocationHolder } from "@/custom_modules/HelperFunctions";
 import { PostHolder, PostProps } from "@/custom_modules/PostComponents";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import { useCallback, useState } from "react";
@@ -15,7 +16,7 @@ type HeaderProps = {
 function Header(props: HeaderProps) {
     return (
         <View>
-            <Text  style={styles.header}>{props.eventName}</Text>
+            <Text style={styles.header}>{props.eventName}</Text>
         </View>
     );
 }
@@ -23,11 +24,11 @@ function Header(props: HeaderProps) {
 export default function EventPostsScreen(props: GlobalUserIDProps) {
     const [localEventName, setEventName] = useState("");
     const [componentList, setComponentList] = useState<PostProps[]>([]);
+    const [localUserLocation, setLocalUserLocation] = useState<LocationHolder>({latitude: 0, longitude: 0});
+    const [withinRange, setWithinRange] = useState(false);
 
     const params = useRoute().params;
     const localEventID = params.eventID;
-
-    const navigation = useNavigation();
 
     useFocusEffect(useCallback(() => {
         const fetchInfo = async () => {
@@ -44,6 +45,11 @@ export default function EventPostsScreen(props: GlobalUserIDProps) {
             if (eventData) {
                 setEventName(eventDataProp.eventName);
             }
+
+            const currLocation = await GetCurrentLocationCoords();
+            setLocalUserLocation(currLocation);
+            const rangeCheck = CheckDistance({startLocation: currLocation, endLocation: ConvertSQLCoordsToNumber(eventDataProp.eventLocation)});
+            setWithinRange(rangeCheck);
         }
 
         fetchInfo();
@@ -57,15 +63,38 @@ export default function EventPostsScreen(props: GlobalUserIDProps) {
         <View style={styles.container}>
             <Header eventName={localEventName}/>
             <ScrollView style={styles.postContainer}>
-                <PostHolder postList={componentList}/>
+                <PostHolder postList={componentList} userLocation={localUserLocation}/>
             </ScrollView>
+            <PostButtonComponent EventID={localEventID} WithinRange={withinRange}/>
+        </View>
+    )
+}
+
+type PostButtonProps = {
+    EventID: number;
+    WithinRange: boolean;
+}
+
+function PostButtonComponent(props: PostButtonProps) {
+    const navigation = useNavigation();
+
+    if (props.WithinRange) {
+        return (
             <View style={styles.floatingContainer}>
-                <Pressable style={styles.createPostButton} onPress={() => navigation.navigate("Create Post", {eventID: localEventID})}>
+                <Pressable style={styles.createPostButton} onPress={() => navigation.navigate("Create Post", {eventID: props.EventID})}>
                     <FontAwesome5 name="plus" size={30}/>
                 </Pressable>
             </View>
-        </View>
-    )
+        )
+    } else {
+        return (
+            <View style={styles.floatingContainer}>
+                <View style= {styles.tooFarButton}>
+                    <FontAwesome name="remove" size={30}/>
+                </View>
+            </View>    
+        )
+    }
 }
 
 const styles = StyleSheet.create({
@@ -83,6 +112,15 @@ const styles = StyleSheet.create({
 
     createPostButton: {
         backgroundColor: ButtonColour,
+        width: 75,
+        height: 75,
+        borderRadius: 50,
+        alignItems:'center',
+        justifyContent:'center'
+    },
+
+    tooFarButton: {
+        backgroundColor: '#687a80ff',
         width: 75,
         height: 75,
         borderRadius: 50,

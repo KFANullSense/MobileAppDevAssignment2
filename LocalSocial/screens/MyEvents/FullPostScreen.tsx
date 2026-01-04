@@ -1,7 +1,7 @@
 import { GlobalUserIDProps } from "@/app";
 import { BackgroundColour, ButtonColour, HolderColour } from "@/custom_modules/Colours";
 import { CreateComment, HasUserLikedPost, LikePost, ReturnFullPost, ReturnPostComments, ReturnPostLikes, UnlikePost } from "@/custom_modules/DBConnect";
-import { ConvertCommentListToProps, ConvertPostDetailsToProps } from "@/custom_modules/HelperFunctions";
+import { CheckDistance, ConvertCommentListToProps, ConvertPostDetailsToProps, ConvertSQLCoordsToNumber } from "@/custom_modules/HelperFunctions";
 import { CommentHolder, CommentProps, PostProps } from "@/custom_modules/PostComponents";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFocusEffect, useRoute } from "@react-navigation/native";
@@ -12,21 +12,12 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 export default function FullPostScreen(props: GlobalUserIDProps) {
     const params = useRoute().params;
     const localPostID = params.postID;
+    const localUserLocation = params.userLocation;
 
     const [postDetails, setPostDetails] = useState<PostProps>();
-    const [newCommentText, setNewCommentText] = useState("");
     const [commentList, setCommentList] = useState<CommentProps[]>([]);
 
-    const commentRef = useRef(null);
-    
-    async function PostComment() {
-        const result = await (CreateComment({postID: localPostID, userID: props.userID, commentText: newCommentText}));
-
-        if (result) {
-            commentRef.current.clear();
-            FetchComments();
-        }
-    }
+    const [withinRange, setWithinRange] = useState(false);
 
     async function FetchComments() {
         const commentData = await ReturnPostComments({postID: localPostID});
@@ -48,6 +39,8 @@ export default function FullPostScreen(props: GlobalUserIDProps) {
                 const propData = await ConvertPostDetailsToProps(postData);
 
                 setPostDetails(propData);
+
+                setWithinRange(CheckDistance({startLocation: localUserLocation, endLocation: ConvertSQLCoordsToNumber(propData.location)}));
             }
         }
 
@@ -82,15 +75,9 @@ export default function FullPostScreen(props: GlobalUserIDProps) {
                 <ScrollView>
                     <CommentHolder commentList={commentList}/>
                 </ScrollView>
-                    <View style={styles.commentInputContainer}>
-                        <TextInput ref={commentRef} style={styles.commentTextInput} placeholder={"Enter comment"} onChangeText={(value) => setNewCommentText(value)}/>
-                        <Pressable style={styles.postCommentButton} onPress={async () => {PostComment()}}>
-                            <FontAwesome name="commenting-o" size={25}/>
-                        </Pressable>
-                </View>
+                <CommentInputContainer PostID={localPostID} UserID={props.userID} FetchCommentFunc={FetchComments} WithinRange={withinRange}/>
             </View>
         </View>
-        
     )
 }
 
@@ -157,6 +144,44 @@ function LikeButton(props: LikeButtonProps) {
                 <FontAwesome name={"heart"} size={30}/>
                 <Text style={styles.likesText}>{postLikes}</Text>
             </Pressable>
+        )
+    }
+}
+
+type CommentInputProps = {
+    PostID: number;
+    UserID: number;
+    FetchCommentFunc: Function;
+    WithinRange: boolean;
+}
+
+function CommentInputContainer(props: CommentInputProps) {
+    const commentRef = useRef(null);
+    const [newCommentText, setNewCommentText] = useState("");
+    
+    async function PostComment() {
+        const result = await (CreateComment({postID: props.PostID, userID: props.UserID, commentText: newCommentText}));
+
+        if (result) {
+            commentRef.current.clear();
+            props.FetchCommentFunc();
+        }
+    }
+
+    if (props.WithinRange) {
+        return (
+            <View style={styles.commentInputContainer}>
+                <TextInput ref={commentRef} style={styles.commentTextInput} placeholder={"Enter comment"} onChangeText={(value) => setNewCommentText(value)}/>
+                <Pressable style={styles.postCommentButton} onPress={async () => {PostComment()}}>
+                    <FontAwesome name="commenting-o" size={25}/>
+                </Pressable>
+            </View>
+        )
+    } else {
+        return (
+            <View style={styles.commentInputContainer}>
+                <Text>Not close enough to leave comment.</Text>
+            </View>
         )
     }
 }
