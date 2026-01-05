@@ -1,6 +1,7 @@
+import { MaterialDesignIcons } from '@react-native-vector-icons/material-design-icons';
 import { useNavigation } from "@react-navigation/native";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { BackgroundColour, HolderColour, HolderColourDark } from "./CustomStyles";
+import { BackgroundColour, HolderColour, HolderColourDark, HolderColourLight } from "./CustomStyles";
 import { LocationHolder } from "./HelperFunctions";
 
 type HomePostRootProps = {
@@ -233,17 +234,38 @@ export type FriendObjectProps = {
 export function FriendObject(props: FriendObjectProps) {
     const navigation = useNavigation();
 
-    return (
-        <Pressable onPress={() => navigation.navigate("User Details", {userID: props.profileID})}>
-            <View style={friendStyles.container}>
-                <Image source={{uri:props.profile_picture_url}} style={friendStyles.profilePicture} resizeMode="cover"/>
-                <View style={friendStyles.textColumn}>
-                    <Text style={friendStyles.usernameText}>{props.username}</Text>
-                    <Text style={friendStyles.profileStatusText}>{props.user_status}</Text>
+    if (props.isMutual) {
+        return (
+            <Pressable onPress={() => navigation.navigate("User Details", {userID: props.profileID})}>
+                <View style={friendStyles.container}>
+                    <View style={friendStyles.infoChatButtonRow}>
+                        <View style={friendStyles.userInfoRow}>
+                            <Image source={{uri:props.profile_picture_url}} style={friendStyles.profilePicture} resizeMode="cover"/>
+                            <View style={friendStyles.textColumn}>
+                                <Text style={friendStyles.usernameText}>{props.username}</Text>
+                                <Text style={friendStyles.profileStatusText}>{props.user_status}</Text>
+                            </View>
+                        </View>
+                        <Pressable style={friendStyles.chatButton} onPress={() => navigation.navigate("Message User", {otherUserID: props.profileID})}>
+                            <MaterialDesignIcons name="message-text-outline" size={30}/>
+                        </Pressable>
+                    </View>
                 </View>
-            </View>
-        </Pressable>
-    )
+            </Pressable>
+        )
+    } else {
+        return (
+            <Pressable onPress={() => navigation.navigate("User Details", {userID: props.profileID})}>
+                <View style={friendStyles.container}>
+                    <Image source={{uri:props.profile_picture_url}} style={friendStyles.profilePicture} resizeMode="cover"/>
+                    <View style={friendStyles.textColumn}>
+                        <Text style={friendStyles.usernameText}>{props.username}</Text>
+                        <Text style={friendStyles.profileStatusText}>{props.user_status}</Text>
+                    </View>
+                </View>
+            </Pressable>
+        )
+    }
 }
 
 export type CommentHolderProps = {
@@ -492,7 +514,8 @@ const friendStyles = StyleSheet.create({
         borderRadius:10,
         flex:1,
         width:'95%',
-        flexDirection:'row'
+        flexDirection:'row',
+        justifyContent:'space-between'
     },
     profilePicture: {
         width:50,
@@ -509,5 +532,22 @@ const friendStyles = StyleSheet.create({
     textColumn: {
         flexDirection:'column',
         justifyContent:'center'
+    },
+    chatButton: {
+        width:50,
+        height:50,
+        backgroundColor: HolderColourLight,
+        borderRadius:100,
+        alignItems:'center',
+        justifyContent:'center',
+    },
+    infoChatButtonRow: {
+        flexDirection:'row',
+        justifyContent:'space-between',
+        alignItems:'center',
+        flex:1
+    },
+    userInfoRow: {
+        flexDirection:'row'
     }
 })

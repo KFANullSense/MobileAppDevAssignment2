@@ -4,9 +4,9 @@ import { RetrieveChatMessages, SendChatMessage } from "@/custom_modules/DBConnec
 import { ConvertMessageListToProps } from "@/custom_modules/HelperFunctions";
 import { MessageHolder, MessageProps } from "@/custom_modules/PostComponents";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useRoute } from "@react-navigation/native";
-import { useEffect, useRef, useState } from "react";
-import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { useFocusEffect, useRoute } from "@react-navigation/native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 
 export default function ChatScreen(props: GlobalUserIDProps) {
     const params = useRoute().params;
@@ -16,6 +16,15 @@ export default function ChatScreen(props: GlobalUserIDProps) {
     const [newMessageText, setNewMessageText] = useState("");
 
     const inputRef = useRef(null);
+    const scrollViewRef = useRef(null);
+
+    useFocusEffect(useCallback(() => {
+        FetchMessages(true);
+
+        return () => {
+
+        }
+    }, []));
 
     useEffect(() => {
         const chatRefresh = setInterval(() => {
@@ -25,16 +34,21 @@ export default function ChatScreen(props: GlobalUserIDProps) {
         return () => clearInterval(chatRefresh);
     });
 
-    async function FetchMessages() {
+    async function FetchMessages(wasInitialFetch:boolean = false) {
         const messageData = await RetrieveChatMessages({localUserID: props.userID, userToFollowID: otherUserID});
 
         if (messageData) {
-            const propData = await ConvertMessageListToProps(messageData);
+            const propData = await ConvertMessageListToProps({messageDataArray: messageData, localUserID: props.userID, otherUserID: otherUserID});
 
             if (propData) {
                 setMessageList(propData);
+
+                if (wasInitialFetch) {
+                    await new Promise(res => setTimeout(res, 500));
+                    scrollViewRef.current.scrollToEnd({animated:true});
+                }
             }
-        }
+        }    
     }
 
     async function SendMessage() {
@@ -49,7 +63,9 @@ export default function ChatScreen(props: GlobalUserIDProps) {
     return (
         <View style={styles.container}>
             <View style={styles.messageContainer}>
-                <MessageHolder messageList={messageList}/>
+                <ScrollView ref={scrollViewRef} onContentSizeChange={() => {if (scrollViewRef) {scrollViewRef.current.scrollToEnd({animated:true});}}}>
+                    <MessageHolder messageList={messageList}/>
+                </ScrollView>
             </View>
             <View style={styles.messageInputContainer}>
                 <TextInput ref={inputRef} style={styles.messageTextInput} placeholder={"Enter message"} onChangeText={(value) => setNewMessageText(value)}/>
@@ -81,7 +97,8 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         justifyContent:'space-between',
         alignItems:'center',
-        width:'100%',
+        width:'95%',
+        margin:10
     },
     
     messageTextInput: {

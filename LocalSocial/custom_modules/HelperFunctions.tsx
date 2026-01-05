@@ -204,9 +204,9 @@ export async function ConvertMessageListToProps(props: ChatScreenProps) {
 
     props.messageDataArray.map(localMessage => {
         if (localMessage.message_sender_id == props.localUserID) {
-            messagePropList.push({authorName: localUserProps.username, authorPictureURL: localUserProps.profilePictureURL, messageText: localMessage.message_contents});
+            messagePropList.unshift({authorName: localUserProps.username, authorPictureURL: localUserProps.profilePictureURL, messageText: localMessage.message_contents});
         } else {
-            messagePropList.push({authorName: otherUserProps.username, authorPictureURL: otherUserProps.profilePictureURL, messageText: localMessage.message_contents});
+            messagePropList.unshift({authorName: otherUserProps.username, authorPictureURL: otherUserProps.profilePictureURL, messageText: localMessage.message_contents});
         }
     });
 
