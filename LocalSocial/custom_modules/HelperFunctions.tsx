@@ -1,8 +1,8 @@
 import { ProfileProps } from '@/screens/Profile/FullProfileScreen';
 import * as Location from 'expo-location';
 import getDistance from 'geolib/es/getDistance';
-import { GetJoinedEvents, GetRecentPostsFromEvent, GetRecentPostsFromEventByUser, ReturnUserDetails } from './DBConnect';
-import { CommentProps, EventProps, HomePostHolderProps, PostProps } from './PostComponents';
+import { CheckIfUsersAreMutuallyFollowing, GetJoinedEvents, GetRecentPostsFromEvent, GetRecentPostsFromEventByUser, ReturnUserDetails } from './DBConnect';
+import { CommentProps, EventProps, FriendObjectProps, HomePostHolderProps, PostProps } from './PostComponents';
 
 export function ConvertDateTimeForSQL(inputDate: Date) {
     //get month returns one less, add one to be correct (not sure why only month does this and not the others? oh well)
@@ -174,4 +174,21 @@ export function ConvertProfileDetailsToProps(inputData: Array<JSON>) {
     const returnProp: ProfileProps = {username: profileJSON.username, profilePictureURL: profileJSON.profile_picture_url, userStatus: profileJSON.user_status, profileID: profileJSON.user_id};
 
     return returnProp;
+}
+
+type LocalUserUserListProps = {
+    localUser: number;
+    userList: Array<JSON>;
+}
+
+export async function ConvertUserListToProps(props: LocalUserUserListProps) {
+    const requests = await Promise.all(props.userList.map(async (localProfile) => {
+        const isMutualVar = await CheckIfUsersAreMutuallyFollowing({localUserID: props.localUser, userToFollowID: localProfile.user_id})
+
+        const localUserProps: FriendObjectProps = {username: localProfile.username, profile_picture_url: localProfile.profile_picture_url, user_status: localProfile.user_status, profileID: localProfile.user_id, isMutual: isMutualVar}
+
+        return localUserProps;
+    }));
+
+    return requests;
 }

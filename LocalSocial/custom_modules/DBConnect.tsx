@@ -207,6 +207,21 @@ export async function GetPostCount(props: UserIDProps) {
     return -1;
 }
 
+//Get list of all users specified user is following
+export async function GetFollowingList(props:UserIDProps) {
+    console.log("Returning following list from user", props.userID);
+
+    const {data, error} = await supabase.rpc("getuserfollowinglist", {input_user_id: props.userID});
+
+    if (error) {
+        console.error("Error retrieving following list:", error);
+    } else {
+        return data;
+    }
+
+    return [];
+}
+
 type FollowUserProps = {
     localUserID: number;
     userToFollowID: number;
@@ -288,6 +303,25 @@ export async function CheckIfUsersAreMutuallyFollowing(props: FollowUserProps) {
     }
 
     return false;
+}
+
+export async function CheckIfUserFollowing(props: FollowUserProps) {
+    console.log("Checking if user", props.localUserID, "is following user", props.userToFollowID);
+
+    const {count, error: fetchError} = await supabase.from("user_following").select("*", {count: 'exact', head:true}).eq("follower_user_id", props.localUserID).eq("following_user_id", props.userToFollowID);
+
+    if (fetchError) {
+        console.error("Error checking if user is following:", fetchError);
+    } else {
+        if (count >= 1) {
+            console.log("User is following");
+            return true
+        } else {
+            console.log("User is not following");
+        }
+    }
+
+    return false
 }
 
 type EventIDProps = {

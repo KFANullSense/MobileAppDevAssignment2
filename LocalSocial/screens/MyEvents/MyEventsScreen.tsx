@@ -1,5 +1,5 @@
 import { GlobalUserIDProps } from "@/app";
-import { BackgroundColour, ButtonColour } from "@/custom_modules/Colours";
+import { BackgroundColour, ButtonColour } from "@/custom_modules/CustomStyles";
 import { GetJoinedEvents } from "@/custom_modules/DBConnect";
 import { ConvertEventListToProps } from "@/custom_modules/HelperFunctions";
 import { BorderLine, EventHolder, EventProps } from "@/custom_modules/PostComponents";

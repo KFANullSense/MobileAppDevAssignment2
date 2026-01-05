@@ -1,5 +1,5 @@
 import { GlobalUserIDProps } from "@/app";
-import { BackgroundColour, ButtonColour, HolderColour } from "@/custom_modules/Colours";
+import { BackgroundColour, ButtonColour, HolderColour } from "@/custom_modules/CustomStyles";
 import { CreateComment, HasUserLikedPost, LikePost, ReturnFullPost, ReturnPostComments, ReturnPostLikes, UnlikePost } from "@/custom_modules/DBConnect";
 import { CheckDistance, ConvertCommentListToProps, ConvertPostDetailsToProps, ConvertSQLCoordsToNumber } from "@/custom_modules/HelperFunctions";
 import { CommentHolder, CommentProps, PostProps } from "@/custom_modules/PostComponents";
@@ -112,7 +112,7 @@ function LikeButton(props: LikeButtonProps) {
     async function FetchLikes () {
         const postLikesData = await ReturnPostLikes({postID: props.postID});
 
-        if (postLikesData) {
+        if (postLikesData != null) {
             setPostLikes(postLikesData);
         }
     }

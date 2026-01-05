@@ -1,23 +1,23 @@
 import { GlobalUserIDProps } from "@/app";
-import { BackgroundColour, ButtonColour, HolderColour } from "@/custom_modules/Colours";
-import { DeleteEvent, HasUserJoinedEvent, IsUserHostOfEvent, JoinEvent, LeaveEvent, ReturnFullEvent } from "@/custom_modules/DBConnect";
+import { BackgroundColour, ButtonColour, editButtonStyles, HolderColour } from "@/custom_modules/CustomStyles";
+import { DeleteEvent, HasUserJoinedEvent, IsUserHostOfEvent, JoinEvent, LeaveEvent, ReturnFullEvent, UpdateEventDescription, UpdateEventName } from "@/custom_modules/DBConnect";
 import { CheckDistance, ConvertEventDetailsToProp, ConvertSQLCoordsToNumber, GetCurrentLocationCoords } from "@/custom_modules/HelperFunctions";
 import { BorderLine, EventProps } from "@/custom_modules/PostComponents";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
-import { useCallback, useState } from "react";
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useCallback, useRef, useState } from "react";
+import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 
 export default function FullEventScreen(props: GlobalUserIDProps) {
     const params = useRoute().params;
     const localEventID = params.eventID;
 
-    const [eventDetails, setEventDetails] = useState<EventProps>();
+    const [eventDetails, setEventDetails] = useState<EventProps>({eventName: "Loading...", eventDescription: "Loading...", eventID: -1, eventLocation: "", startTime: "", endTime: ""});
     const [isHost, setIsHost] = useState(false);
     const [withinRange, setWithinRange] = useState(false);
     
-    useFocusEffect(useCallback(() => {
-        const fetchData = async () => {
+    async function FetchData() {
             const eventData = await ReturnFullEvent({eventID: localEventID});
             const eventProps = ConvertEventDetailsToProp(eventData);
             setEventDetails(eventProps);
@@ -28,9 +28,10 @@ export default function FullEventScreen(props: GlobalUserIDProps) {
             const currLocation = await GetCurrentLocationCoords();
             const rangeCheck = CheckDistance({startLocation: currLocation, endLocation: ConvertSQLCoordsToNumber(eventProps.eventLocation)});
             setWithinRange(rangeCheck);
-        }
+    } 
 
-        fetchData();
+    useFocusEffect(useCallback(() => {
+        FetchData();
 
         return () => {
 
@@ -44,7 +45,7 @@ export default function FullEventScreen(props: GlobalUserIDProps) {
     return (
         
         <View style={styles.container}>
-            <Text style={styles.header}>{eventDetails?.eventName}</Text>
+            <EventNameDisplay eventID={localEventID} isOwner={isHost} eventData={eventDetails} successFunction={FetchData}/>
             <BorderLine/>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={styles.eventImage} resizeMode="cover"/>
@@ -53,12 +54,143 @@ export default function FullEventScreen(props: GlobalUserIDProps) {
                     <Text style={styles.eventDatesText}>End Time: {eventDetails?.endTime}</Text>
                 </View>
                 <View style={styles.eventInfoBox}>
-                    <Text style={styles.eventInfoText}>{eventDetails?.eventDescription}</Text>
+                    <EventDescriptionDisplay eventID={localEventID} isOwner={isHost} eventData={eventDetails} successFunction={FetchData}/>
                 </View>
                 <ButtonHolder IsHost={isHost} UserID={props.userID} EventID={localEventID} WithinRange={withinRange}/>
             </ScrollView>
         </View>
     )
+}
+
+type EventEditModalProps = {
+    eventID: number;
+    isOwner: boolean;
+    eventData: EventProps;
+    successFunction: Function;
+}
+
+function EventNameDisplay (props: EventEditModalProps) { 
+    const [modalVisible, setModalVisible] = useState(false);
+    const [eventNameString, setEventNameString] = useState("");
+    
+    const eventNameInputRef = useRef(null);
+    
+    function OpenModal() {
+        setEventNameString(props.eventData.eventName);
+        setModalVisible(true);
+    }
+
+    async function ModalUpdateEventName() {
+        if (eventNameString.length <= 2) {
+            console.error("Event name must be at least three characters long!");
+            return;
+        }
+
+        const result = await UpdateEventName({eventID: props.eventID, newString: eventNameString});
+
+        if (result) {
+            props.successFunction();
+            setModalVisible(false);
+            setEventNameString("");
+        }   
+    }
+
+    if (props.isOwner) {
+        return (
+            <View style={styles.header}>
+                <View style={editButtonStyles.editRow}>
+                    <Modal
+                    visible={modalVisible}
+                    transparent={true}
+                    onRequestClose={() => setModalVisible(false)}>
+                        <View style={editButtonStyles.modalContainer}>
+                            <View style={editButtonStyles.modalView}>
+                                <TextInput style={editButtonStyles.modalTextInput} ref={eventNameInputRef} placeholder="Enter new event name..." onChangeText={(value) => setEventNameString(value)} value={eventNameString}/>
+                                <Pressable style={editButtonStyles.modalButton} onPress={async () => {ModalUpdateEventName()}}>
+                                    <Text>Update Event Name</Text>
+                                </Pressable>
+                                <Pressable style={editButtonStyles.modalButton} onPress={() => {setModalVisible(false)}}>
+                                    <Text>Cancel</Text>
+                                </Pressable>
+                            </View>
+                            </View>
+                    </Modal>
+
+                    <Text style={styles.eventNameText}>{props.eventData.eventName}</Text>
+                    <Pressable style={editButtonStyles.editButton} onPress={() => OpenModal()}>
+                        <FontAwesome5 name="edit" size={25}/>
+                    </Pressable>
+                </View>
+            </View>
+        )
+    } else {
+        return (
+            <View style={styles.header}>
+                <Text style={styles.eventNameText}>{props.eventData.eventName}</Text>
+            </View>
+        )
+    }
+}
+
+function EventDescriptionDisplay(props: EventEditModalProps) {
+    const [modalVisible, setModalVisible] = useState(false);
+    const [eventDescriptionString, setEventDescriptionString] = useState("");
+    
+    const eventDescriptionInputRef = useRef(null);
+    
+    function OpenModal() {
+        setEventDescriptionString(props.eventData.eventDescription);
+        setModalVisible(true);
+    }
+
+    async function ModalUpdateEventDescription() {
+        if (eventDescriptionString.length == 0) {
+            console.error("Event description cannot be empty!");
+            return;
+        }
+
+        const result = await UpdateEventDescription({eventID: props.eventID, newString: eventDescriptionString});
+
+        if (result) {
+            props.successFunction();
+            setModalVisible(false);
+            setEventDescriptionString("");
+        }
+    }
+
+    if (props.isOwner) {
+        return (
+            <View style={editButtonStyles.editRow}>
+                <Modal
+                visible={modalVisible}
+                transparent={true}
+                onRequestClose={() => setModalVisible(false)}>
+                    <View style={editButtonStyles.modalContainer}>
+                        <View style={editButtonStyles.modalView}>
+                            <TextInput style={editButtonStyles.modalTextInput} ref={eventDescriptionInputRef} placeholder="Enter new event description..." onChangeText={(value) => setEventDescriptionString(value)}/>
+                            <Pressable style={editButtonStyles.modalButton} onPress={async () => {ModalUpdateEventDescription()}}>
+                                <Text>Update Event Description</Text>
+                            </Pressable>
+                            <Pressable style={editButtonStyles.modalButton} onPress={() => {setModalVisible(false)}}>
+                                <Text>Cancel</Text>
+                            </Pressable>
+                        </View>
+                        </View>
+                </Modal>
+
+                <Text style={styles.eventInfoText}>{props.eventData.eventDescription}</Text>
+                <Pressable style={editButtonStyles.editButton} onPress={() => OpenModal()}>
+                    <FontAwesome5 name="edit" size={25}/>
+                </Pressable>
+            </View>
+        )
+    } else {
+        return (
+            <View>
+                <Text style={styles.eventInfoText}>{props.eventData.eventDescription}</Text>
+            </View>
+        )
+    }
 }
 
 type ButtonHolderProps = {
@@ -156,10 +288,13 @@ const styles = StyleSheet.create({
     },
 
     header: {
-        fontSize: 32,
         alignSelf:'center',
         textAlign:'center',
         margin:10
+    },
+
+    eventNameText: {
+        fontSize: 24
     },
 
     scrollContainer: {

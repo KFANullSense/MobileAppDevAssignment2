@@ -31,7 +31,7 @@ const TabNav = (props: GlobalUserIDProps) => {
       }}
       />
       <Tab.Screen
-      name = "Friends"
+      name = "Community"
       children = {() => <FriendsScreen userID={props.userID}/>}
       options = {{
         tabBarIcon: ({color, size}) => (

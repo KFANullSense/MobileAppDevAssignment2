@@ -1,5 +1,5 @@
 import { GlobalUserIDProps } from "@/app";
-import { BackgroundColour, ButtonColour } from "@/custom_modules/Colours";
+import { BackgroundColour, ButtonColour } from "@/custom_modules/CustomStyles";
 import { CreatePost } from "@/custom_modules/DBConnect";
 import { GetCurrentLocationForSQL } from "@/custom_modules/HelperFunctions";
 import FontAwesome from "@expo/vector-icons/FontAwesome";

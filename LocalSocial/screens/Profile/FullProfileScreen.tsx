@@ -1,6 +1,6 @@
 import { GlobalUserIDProps } from "@/app";
-import { BackgroundColour, ButtonColour, HolderColour, HolderColourLight } from "@/custom_modules/Colours";
-import { GetFollowerCount, GetFollowingCount, GetPostCount, GetUserLikeCount, ReturnUserDetails, UpdateUsername, UpdateUserStatus } from "@/custom_modules/DBConnect";
+import { BackgroundColour, ButtonColour, editButtonStyles, HolderColour } from "@/custom_modules/CustomStyles";
+import { CheckIfUserFollowing, FollowUser, GetFollowerCount, GetFollowingCount, GetPostCount, GetUserLikeCount, ReturnUserDetails, UnfollowUser, UpdateUsername, UpdateUserStatus } from "@/custom_modules/DBConnect";
 import { ConvertProfileDetailsToProps, RetrieveRecentPostsByUser } from "@/custom_modules/HelperFunctions";
 import { BorderLine, HomePostHolderProps, HomePostRoot } from "@/custom_modules/PostComponents";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
@@ -15,7 +15,7 @@ export type ProfileProps = {
     userStatus: string;
 }
 
-export type ProfileScreenProps = {
+type ProfileScreenProps = {
     userID: number;
     userProfileID: number | null;
 }
@@ -27,6 +27,7 @@ export function FullProfileScreen(props: ProfileScreenProps) {
     const [userFollowing, setUserFollowing] = useState(0);
     const [userFollowers, setUserFollowers] = useState(0);
     const [userPostNum, setUserPostNum] = useState(0);
+    const [isFollowing, setIsFollowing] = useState(false);
 
     //If profile ID not passed, retrieve dynamically (this lets the screen work as a root screen on profile page as well as when retrieved)
     if (props.userProfileID == null) {
@@ -58,6 +59,9 @@ export function FullProfileScreen(props: ProfileScreenProps) {
 
         const localPostNum = await GetPostCount({userID: localProfileID});
         if (localPostNum) {setUserPostNum(localPostNum);}
+
+        const hasUserFollowed = await CheckIfUserFollowing({localUserID: props.userID, userToFollowID: localProfileID});
+        setIsFollowing(hasUserFollowed);
     }
 
     useFocusEffect(useCallback(() => {
@@ -72,7 +76,7 @@ export function FullProfileScreen(props: ProfileScreenProps) {
 
     return (
         <View style={styles.container}>
-            <UsernameHeader userID={props.userID} isOwner={isProfileOwner} profileData={profileData} successFunction={FetchData}/>
+            <UsernameHeader userID={props.userID} isOwner={isProfileOwner} profileData={profileData} successFunction={FetchData} setIsFollowingFunction={setIsFollowing} isFollowing={isFollowing}/>
             <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={styles.profilePicture} resizeMode="cover"/>
             <View style={styles.userStatsRow}>
                 <Text style={styles.userStatText}>{userLikes} Likes</Text>
@@ -93,18 +97,34 @@ export function FullProfileScreen(props: ProfileScreenProps) {
     )
 }
 
-type EditModalProps = {
+type ProfileEditModalProps = {
     userID: number;
     isOwner: boolean;
     profileData: ProfileProps;
     successFunction: Function;
 }
 
-function UsernameHeader(props:EditModalProps) {    
+type ProfileEditFollowModalProps = {
+    userID: number;
+    isOwner: boolean;
+    profileData: ProfileProps;
+    successFunction: Function;
+    isFollowing: boolean;
+    setIsFollowingFunction: (newValue: boolean) => void; 
+}
+
+
+
+function UsernameHeader(props:ProfileEditFollowModalProps) {    
     const [modalVisible, setModalVisible] = useState(false);
     const [usernameString, setUsernameString] = useState("");
 
     const usernameInputRef = useRef(null);
+
+    function OpenModal() {
+        setUsernameString(props.profileData.username);
+        setModalVisible(true);
+    }
 
     async function ModalUpdateUsername() {
         if (usernameString.length <= 2) {
@@ -118,7 +138,7 @@ function UsernameHeader(props:EditModalProps) {
             props.successFunction();
             setModalVisible(false);
             setUsernameString("");
-        }   
+        }
     }
 
     if (props.isOwner) {
@@ -130,7 +150,7 @@ function UsernameHeader(props:EditModalProps) {
                 onRequestClose={() => setModalVisible(false)}>
                     <View style={editButtonStyles.modalContainer}>
                         <View style={editButtonStyles.modalView}>
-                            <TextInput style={editButtonStyles.modalTextInput} ref={usernameInputRef} placeholder="Enter new username..." onChangeText={(value) => setUsernameString(value)}/>
+                            <TextInput style={editButtonStyles.modalTextInput} ref={usernameInputRef} placeholder="Enter new username..." onChangeText={(value) => setUsernameString(value)} value={usernameString}/>
                             <Pressable style={editButtonStyles.modalButton} onPress={async () => {ModalUpdateUsername()}}>
                                 <Text>Update Username</Text>
                             </Pressable>
@@ -142,23 +162,31 @@ function UsernameHeader(props:EditModalProps) {
                 </Modal>
 
                 <Text style={styles.header}>{props.profileData.username}</Text>
-                <Pressable style={editButtonStyles.editButton} onPress={() => setModalVisible(true)}>
+                <Pressable style={editButtonStyles.editButton} onPress={() => OpenModal()}>
                     <FontAwesome5 name="edit" size={25}/>
                 </Pressable>
             </View>
         )
     } else {
         return (
-            <Text style={styles.header}>{props.profileData.username}</Text>
+            <View style={editButtonStyles.editRow}>
+                <Text style={styles.header}>{props.profileData.username}</Text>
+                <FollowButton localUserID={props.userID} followUserID={props.profileData.profileID} isFollowing={props.isFollowing} setIsFollowingFunction={props.setIsFollowingFunction}/>
+            </View>
         )
     }
 }
 
-function UserStatusDisplay(props:EditModalProps) {    
+function UserStatusDisplay(props:ProfileEditModalProps) {    
     const [modalVisible, setModalVisible] = useState(false);
     const [userStatusString, setUserStatusString] = useState("");
 
     const userStatusInputRef = useRef(null);
+
+    function OpenModal() {
+        setUserStatusString(props.profileData.userStatus);
+        setModalVisible(true);
+    }
 
     async function ModalUpdateUsername() {
         const result = await UpdateUserStatus({userID: props.userID, newString: userStatusString});
@@ -180,7 +208,7 @@ function UserStatusDisplay(props:EditModalProps) {
                     onRequestClose={() => setModalVisible(false)}>
                         <View style={editButtonStyles.modalContainer}>
                             <View style={editButtonStyles.modalView}>
-                                <TextInput style={editButtonStyles.modalTextInput} ref={userStatusInputRef} placeholder="Enter new status..." onChangeText={(value) => setUserStatusString(value)}/>
+                                <TextInput style={editButtonStyles.modalTextInput} ref={userStatusInputRef} placeholder="Enter new status..." onChangeText={(value) => setUserStatusString(value)} value={userStatusString}/>
                                 <Pressable style={editButtonStyles.modalButton} onPress={async () => {ModalUpdateUsername()}}>
                                     <Text>Update User Status</Text>
                                 </Pressable>
@@ -191,7 +219,7 @@ function UserStatusDisplay(props:EditModalProps) {
                             </View>
                     </Modal>
                     <Text>User status:</Text>
-                    <Pressable style={editButtonStyles.editButton} onPress={() => setModalVisible(true)}>
+                    <Pressable style={editButtonStyles.editButton} onPress={() => OpenModal()}>
                         <FontAwesome5 name="edit" size={15}/>
                     </Pressable>
                 </View>
@@ -244,11 +272,52 @@ function ProfilePosts(props: GlobalUserIDProps) {
     }
 }
 
+type FollowButtonProps = {
+    localUserID: number;
+    followUserID: number;
+    isFollowing: boolean;
+    setIsFollowingFunction: (newValue: boolean) => void; 
+}
+
+function FollowButton(props: FollowButtonProps) {
+    
+
+    async function FollowUserPress() {
+        const result = await FollowUser({localUserID: props.localUserID, userToFollowID: props.followUserID});
+
+        if (result) {
+            props.setIsFollowingFunction(true);
+        }
+    }
+
+    async function UnfollowUserPress() {
+        const result = await UnfollowUser({localUserID: props.localUserID, userToFollowID: props.followUserID});
+
+        if (result) {
+            props.setIsFollowingFunction(false);
+        }
+    }
+
+    if (!props.isFollowing) {
+        return (
+            <Pressable style={styles.followButton} onPress={async() => {FollowUserPress()}}>
+                <FontAwesome5 name={"user-plus"} size={20}/>
+            </Pressable>
+        )
+    } else {
+        return (
+            <Pressable style={styles.followButton} onPress={async() => {UnfollowUserPress()}}>
+                <FontAwesome5 name={"user-times"} size={20}/>
+            </Pressable>
+        )
+    }
+}
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: BackgroundColour,
-        alignItems:'center'
+        alignItems:'center',
     },
     header: {
         justifyContent: 'center',
@@ -258,7 +327,7 @@ const styles = StyleSheet.create({
         fontSize:36
     },
     postContainer: {
-        marginTop:10
+        marginTop:10,
     },
     profilePicture: {
         width:'50%',
@@ -287,12 +356,14 @@ const styles = StyleSheet.create({
         borderRadius:10,
     },
     recentPostsContainer: {
-        backgroundColor:HolderColour,
+        backgroundColor: HolderColour,
         margin:10,
         marginTop:10,
-        marginBottom:5,
         paddingTop:10,
-        borderRadius:20
+        borderRadius:20,
+        alignSelf:'stretch',
+        flex:1,
+        paddingBottom:40
     },
     recentPostsText: {
         fontSize:20,
@@ -300,43 +371,14 @@ const styles = StyleSheet.create({
     },
     userStatText: {
         fontSize:18
-    }
-})
-
-const editButtonStyles = StyleSheet.create({
-    editRow: {
+    },
+    followButton: {
+        backgroundColor: ButtonColour,
         flexDirection:'row',
         alignItems:'center',
-    },
-    editButton: {
-        marginLeft:5,
-        marginTop:0,
-        backgroundColor:ButtonColour,
-        borderRadius:10,
-        padding:5
-    },
-    modalButton: {
-        backgroundColor:ButtonColour,
-        padding:10,
-        alignItems:'center',
-        margin:5,
-        borderRadius:10
-    },
-    modalContainer: {
         justifyContent:'center',
-        alignItems:'center',
-        flex:1
-    },
-    modalView: {
-        backgroundColor:HolderColourLight,
-        padding:20,
-        width:'75%',
-        borderColor:'black',
-        borderWidth:2,
-        borderRadius:10
-    },
-    modalTextInput: {
-        backgroundColor:'#ffffff',
-        margin:10
+        padding:10,
+        borderRadius:10,
+        marginLeft:15
     }
 })

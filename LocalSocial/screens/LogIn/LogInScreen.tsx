@@ -1,4 +1,4 @@
-import { BackgroundColour, ButtonColour } from '@/custom_modules/Colours';
+import { BackgroundColour, ButtonColour } from '@/custom_modules/CustomStyles';
 import { CreateUser, LogInToUser } from '@/custom_modules/DBConnect';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";

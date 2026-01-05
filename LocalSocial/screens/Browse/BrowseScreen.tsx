@@ -1,5 +1,5 @@
 import { GlobalUserIDProps } from "@/app";
-import { BackgroundColour } from "@/custom_modules/Colours";
+import { BackgroundColour } from "@/custom_modules/CustomStyles";
 import { GetNearbyEvents } from "@/custom_modules/DBConnect";
 import { ConvertCoordsForSQL, ConvertEventListToProps, ConvertSQLCoordsToNumber, GetCurrentLocationCoords, LocationHolder } from "@/custom_modules/HelperFunctions";
 import { EventHolderProps, EventProps } from "@/custom_modules/PostComponents";

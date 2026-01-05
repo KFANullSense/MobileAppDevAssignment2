@@ -1,5 +1,5 @@
 import { GlobalUserIDProps } from "@/app";
-import { BackgroundColour, ButtonColour } from "@/custom_modules/Colours";
+import { BackgroundColour, ButtonColour } from "@/custom_modules/CustomStyles";
 import { CreateEvent } from "@/custom_modules/DBConnect";
 import { ConvertDateTimeForSQL, GetCurrentLocationForSQL } from "@/custom_modules/HelperFunctions";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -32,18 +32,22 @@ export default function CreateEventScreen(props: GlobalUserIDProps) {
         if (title.length == 0 || description.length == 0) {
             console.error("Title and description cannot be empty")
         } else {
-            if (endTime <= startTime) {
-                console.error("End time cannot be before or equal to start time");
+            if (title.length <= 2) {
+                console.error("Title must be at least 3 characters long!");
             } else {
-                const locationValue = await GetCurrentLocationForSQL();
-
-                if (locationValue == "") {
-                    console.error("Error while fetching location");
+                if (endTime <= startTime) {
+                    console.error("End time cannot be before or equal to start time");
                 } else {
-                    const result = await CreateEvent({eventName: title, eventDescription: description, positionString: locationValue, eventStartTime: ConvertDateTimeForSQL(startTime), eventEndTime: ConvertDateTimeForSQL(endTime), userID: props.userID})
+                    const locationValue = await GetCurrentLocationForSQL();
 
-                    if (result == true) {
-                        navigation.goBack();
+                    if (locationValue == "") {
+                        console.error("Error while fetching location");
+                    } else {
+                        const result = await CreateEvent({eventName: title, eventDescription: description, positionString: locationValue, eventStartTime: ConvertDateTimeForSQL(startTime), eventEndTime: ConvertDateTimeForSQL(endTime), userID: props.userID})
+
+                        if (result == true) {
+                            navigation.goBack();
+                        }
                     }
                 }
             }

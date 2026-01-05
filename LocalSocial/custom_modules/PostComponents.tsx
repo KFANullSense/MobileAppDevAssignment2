@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { BackgroundColour, HolderColour, HolderColourDark } from "./Colours";
+import { BackgroundColour, HolderColour, HolderColourDark } from "./CustomStyles";
 import { LocationHolder } from "./HelperFunctions";
 
 type HomePostRootProps = {
@@ -51,6 +51,7 @@ export function HomePostHolder(props: HomePostHolderProps) {
                         location={localPost.location}
                         postID={localPost.postID}
                         userLocation={localPost.userLocation}
+                        authorID={localPost.authorID}
                         key={i}
                     />)}
             </View>
@@ -70,6 +71,7 @@ export function PostHolder(props: PostHolderProps) {
                 location={localPost.location}
                 postID={localPost.postID}
                 userLocation={localPost.userLocation}
+                authorID={localPost.authorID}
                 key={i}
             />)}
         </View>
@@ -167,8 +169,51 @@ export function EventObject(props: EventProps) {
     )
 }
 
+export type FriendHolderProps = {
+    friendList: FriendObjectProps[];
+}
+
+export function FriendHolder (props: FriendHolderProps) {
+    return (
+        <View>
+            {props.friendList.map((localProfile, i) => <FriendObject
+                username={localProfile.username}
+                profile_picture_url={localProfile.profile_picture_url}
+                profileID={localProfile.profileID}
+                user_status={localProfile.user_status}
+                isMutual={localProfile.isMutual}
+                key={i}
+            />)}
+        </View>
+    )
+}
+
+export type FriendObjectProps = {
+    profileID: number;
+    username: string;
+    profile_picture_url: string;
+    user_status: string;
+    isMutual: boolean;
+}
+
+export function FriendObject(props: FriendObjectProps) {
+    const navigation = useNavigation();
+
+    return (
+        <Pressable onPress={() => navigation.navigate("User Details", {userID: props.profileID})}>
+            <View style={friendStyles.container}>
+                <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={friendStyles.profilePicture} resizeMode="cover"/>
+                <View style={friendStyles.textColumn}>
+                    <Text style={friendStyles.usernameText}>{props.username}</Text>
+                    <Text style={friendStyles.profileStatusText}>{props.user_status}</Text>
+                </View>
+            </View>
+        </Pressable>
+    )
+}
+
 export type CommentHolderProps = {
-    commentList: CommentProps[]
+    commentList: CommentProps[];
 }
 
 export function CommentHolder(props: CommentHolderProps) {
@@ -362,7 +407,36 @@ const commentStyles = StyleSheet.create({
         borderRadius:40,
         margin:10
     },
-    textRow: {
+    textColumn: {
 
+    }
+})
+
+const friendStyles = StyleSheet.create({
+    container: {
+        alignItems: 'center',
+        backgroundColor: HolderColour,
+        margin:10,
+        padding:10,
+        borderRadius:10,
+        flex:1,
+        width:'95%',
+        flexDirection:'row'
+    },
+    profilePicture: {
+        width:50,
+        height:50, 
+        borderRadius:40,
+        margin:10
+    },
+    usernameText: {
+        fontSize:22
+    },
+    profileStatusText: {
+        marginTop:5
+    },
+    textColumn: {
+        flexDirection:'column',
+        justifyContent:'center'
     }
 })

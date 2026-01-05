@@ -1,5 +1,5 @@
 import { GlobalUserIDProps } from "@/app";
-import { BackgroundColour } from "@/custom_modules/Colours";
+import { BackgroundColour } from "@/custom_modules/CustomStyles";
 import { RetrieveRecentPostsForUser } from "@/custom_modules/HelperFunctions";
 import { BorderLine, HomePostHolderProps, HomePostRoot } from "@/custom_modules/PostComponents";
 import { useFocusEffect } from "@react-navigation/native";
