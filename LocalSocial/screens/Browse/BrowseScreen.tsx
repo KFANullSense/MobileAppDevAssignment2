@@ -2,13 +2,14 @@ import { GlobalUserIDProps } from "@/app";
 import { BackgroundColour } from "@/custom_modules/CustomStyles";
 import { GetNearbyEvents } from "@/custom_modules/DBConnect";
 import { ConvertCoordsForSQL, ConvertEventListToProps, ConvertSQLCoordsToNumber, GetCurrentLocationCoords, LocationHolder } from "@/custom_modules/HelperFunctions";
-import { EventHolderProps, EventProps } from "@/custom_modules/PostComponents";
+import { BorderLine, EventHolderProps, EventProps } from "@/custom_modules/PostComponents";
 import { useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useRef, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import MapView, { Marker } from 'react-native-maps';
+import { SafeAreaView } from "react-native-safe-area-context";
 import CreatePostScreen from "../MyEvents/CreatePostScreen";
 import EventPostsScreen from "../MyEvents/EventPostsScreen";
 import FullEventScreen from "../MyEvents/FullEventScreen";
@@ -51,8 +52,9 @@ export function BrowseScreen(props: GlobalUserIDProps) {
     }, []));
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <Text style={styles.header}>Browse</Text>
+            <BorderLine/>
             <MapView
                 initialRegion={{
                     latitude: localCoords.latitude,
@@ -68,7 +70,7 @@ export function BrowseScreen(props: GlobalUserIDProps) {
             >
                 <EventMarkers eventList={nearbyEvents}/>
             </MapView>
-        </View>
+        </SafeAreaView>
     )
 }
 
@@ -120,13 +122,15 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start'
     },
     header: {
-        fontSize: 32,
+        fontSize: 38,
         alignSelf:'center',
         textAlign:'center',
-        margin:10
+        margin:10,
+        paddingTop:15
     },
     map: {
         width: '100%',
-        height:'100%'
+        height:'100%',
+        marginTop:20
     }
 })

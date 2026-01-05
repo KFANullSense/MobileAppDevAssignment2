@@ -8,6 +8,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useCallback, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { FullProfileScreen } from "../Profile/FullProfileScreen";
 import CreateEventScreen from "./CreateEventScreen";
 import CreatePostScreen from "./CreatePostScreen";
@@ -58,20 +59,35 @@ function MyEventsScreen(props: GlobalUserIDProps) {
         }
     }, []));
 
-    return (
-        <View style={styles.container}>
-            <Header/>
-            <BorderLine/>
-            <ScrollView style={styles.eventHolderContainer}>
-                <EventHolder eventList={componentList}/>
-            </ScrollView>
-            <View style={styles.floatingContainer}>
-                <Pressable style={styles.createEventButton} onPress={() => navigation.navigate("Create Event")}>
-                    <FontAwesome5 name="plus" size={30}/>
-                </Pressable>
-            </View>
-        </View>
-    )
+    if (componentList.length == 0) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <Header/>
+                <BorderLine/>
+                <Text style={styles.noEventsJoined}>You haven't joined any events! Go to Browse to find nearby events, or tap the create button below to create your own.</Text>
+                <View style={styles.floatingContainer}>
+                    <Pressable style={styles.createEventButton} onPress={() => navigation.navigate("Create Event")}>
+                        <FontAwesome5 name="plus" size={30}/>
+                    </Pressable>
+                </View>
+            </SafeAreaView>
+        )
+    } else {
+        return (
+            <SafeAreaView style={styles.container}>
+                <Header/>
+                <BorderLine/>
+                <ScrollView style={styles.eventHolderContainer}>
+                    <EventHolder eventList={componentList}/>
+                </ScrollView>
+                <View style={styles.floatingContainer}>
+                    <Pressable style={styles.createEventButton} onPress={() => navigation.navigate("Create Event")}>
+                        <FontAwesome5 name="plus" size={30}/>
+                    </Pressable>
+                </View>
+            </SafeAreaView>
+        )
+    }
 }
 
 export default function RootScreen(props: GlobalUserIDProps) {
@@ -110,7 +126,12 @@ const styles = StyleSheet.create({
     header: {
         justifyContent: 'center',
         alignItems: 'center',
-        paddingTop: 20,
+        paddingTop: 25,
         paddingBottom: 20
+    },
+    noEventsJoined: {
+        textAlign: 'center',
+        fontSize: 22,
+        marginTop:25
     }
 })

@@ -18,7 +18,7 @@ export default function CreatePostScreen(props: GlobalUserIDProps) {
     const [body, setBody] = React.useState("");
     const [localImage, setLocalImage] = useState("");
 
-    const [modalVisible, setModalVisible] = useState(false);
+    const [imageModalVisible, setImageModalVisible] = useState(false);
 
     async function ValidateInput() {
         if (title.length == 0 || body.length == 0) {
@@ -57,11 +57,11 @@ export default function CreatePostScreen(props: GlobalUserIDProps) {
 
     return (
         <View style={styles.container}>
-            <ImagePicker modalVisible={modalVisible} setModalVisible={setModalVisible} updateImageFunc={setLocalImage}/>
+            <ImagePicker modalVisible={imageModalVisible} setModalVisible={setImageModalVisible} updateImageFunc={setLocalImage}/>
 
             <View style = {styles.eventCreateHolder}>
                 <TextInput style={styles.titleInput} placeholder="Post Title" onChangeText={(value) => setTitle(value)}/>
-                    <ImagePlaceholder localImageURI={localImage} setModalVisibleFunc={setModalVisible}/>
+                <ImagePlaceholder localImageURI={localImage} setModalVisibleFunc={setImageModalVisible}/>
                 <TextInput style={styles.descriptionInput} multiline placeholder="Post Contents" onChangeText={(value) => setBody(value)}/>
             </View>
             <View style={styles.floatingContainer}> 
@@ -88,7 +88,9 @@ const styles = StyleSheet.create({
     titleInput: {
         backgroundColor:'#ffff',
         width:'90%',
-        marginTop:15
+        marginTop:40,
+        padding:15,
+        fontSize:18
     },
 
     descriptionInput: {
@@ -96,7 +98,9 @@ const styles = StyleSheet.create({
         width:'90%',
         height:150,
         marginTop:15,
-        textAlignVertical:'top'
+        textAlignVertical:'top',
+        padding:15,
+        fontSize:18
     },
 
     floatingContainer: {

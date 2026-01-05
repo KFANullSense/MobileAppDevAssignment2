@@ -11,6 +11,11 @@ export const editButtonStyles = StyleSheet.create({
         flexDirection:'row',
         alignItems:'center',
     },
+    editRowStretch: {
+        flexDirection:'row',
+        alignItems:'center',
+        width:"100%"
+    },
     editButton: {
         marginLeft:5,
         marginTop:0,

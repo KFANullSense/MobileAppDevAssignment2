@@ -1,6 +1,6 @@
 import { GlobalUserIDProps } from "@/app";
 import { BackgroundColour, ButtonColour, HolderColour } from "@/custom_modules/CustomStyles";
-import { CreateComment, HasUserLikedPost, LikePost, ReturnFullPost, ReturnPostComments, ReturnPostLikes, UnlikePost } from "@/custom_modules/DBConnect";
+import { CreateComment, defaultProfilePictureURL, HasUserLikedPost, LikePost, ReturnFullPost, ReturnPostComments, ReturnPostLikes, UnlikePost } from "@/custom_modules/DBConnect";
 import { CheckDistance, ConvertCommentListToProps, ConvertPostDetailsToProps, ConvertSQLCoordsToNumber } from "@/custom_modules/HelperFunctions";
 import { CommentHolder, CommentProps, ImageURLType, PostProps } from "@/custom_modules/PostComponents";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -16,7 +16,7 @@ export default function FullPostScreen(props: GlobalUserIDProps) {
     const localPostID = params.postID;
     const localUserLocation = params.userLocation;
 
-    const [postDetails, setPostDetails] = useState<PostProps>({postBody: "Loading...", postID: -1, postMediaURL: "", postTitle: "Loading...", authorID: -1, authorName:"Loading...", authorPictureURL: "", userLocation: {longitude:0, latitude:0}, location: ""});
+    const [postDetails, setPostDetails] = useState<PostProps>({postBody: "Loading...", postID: -1, postMediaURL: "", postTitle: "Loading...", authorID: -1, authorName:"Loading...", authorPictureURL: defaultProfilePictureURL, userLocation: {longitude:0, latitude:0}, location: ""});
     const [commentList, setCommentList] = useState<CommentProps[]>([]);
 
     const [withinRange, setWithinRange] = useState(false);
@@ -62,7 +62,7 @@ export default function FullPostScreen(props: GlobalUserIDProps) {
                     <View style={styles.authorLikesContainer}>
                         <Pressable onPress={() => navigation.navigate("User Details", {userID: postDetails?.authorID})}>
                             <View style={styles.authorContainer}>
-                                <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={styles.authorImage} resizeMode="cover"/>
+                                <Image source={{uri:postDetails.authorPictureURL}} style={styles.authorImage} resizeMode="cover"/>
                                 <Text style={styles.authorText}>{postDetails?.authorName}</Text>
                             </View>
                         </Pressable>
@@ -210,7 +210,8 @@ const styles = StyleSheet.create({
         fontSize: 32,
         alignSelf:'center',
         textAlign:'center',
-        margin:10
+        margin:10,
+        paddingTop:15
     },
 
     scrollViewHolder: {
@@ -277,7 +278,7 @@ const styles = StyleSheet.create({
         backgroundColor: HolderColour,
         marginTop:10,
         padding:10,
-        borderRadius:10
+        borderRadius:10,
     },
 
     postBodyText: {
@@ -303,6 +304,8 @@ const styles = StyleSheet.create({
     commentTextInput: {
         backgroundColor:'#ffffff',
         width:'85%',
+        padding:15,
+        fontSize:18
     },
 
     postCommentButton: {

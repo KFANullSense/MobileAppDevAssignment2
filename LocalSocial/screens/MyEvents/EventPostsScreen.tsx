@@ -59,16 +59,27 @@ export default function EventPostsScreen(props: GlobalUserIDProps) {
         }
     }, []));
 
-    return (
-        <View style={styles.container}>
-            <Header eventName={localEventName}/>
-            <BorderLine/>
-            <ScrollView style={styles.postContainer}>
-                <PostHolder postList={componentList} userLocation={localUserLocation}/>
-            </ScrollView>
-            <PostButtonComponent EventID={localEventID} WithinRange={withinRange}/>
-        </View>
-    )
+    if (componentList.length == 0) {
+        return (
+            <View style={styles.container}>
+                <Header eventName={localEventName}/>
+                <BorderLine/>
+                <Text style={styles.noPostText}>Event has no posts! Tap the button below to create a post if you are within range of the event.</Text>
+                <PostButtonComponent EventID={localEventID} WithinRange={withinRange}/>
+            </View>
+        )
+    } else {
+        return (
+            <View style={styles.container}>
+                <Header eventName={localEventName}/>
+                <BorderLine/>
+                <ScrollView style={styles.postContainer}>
+                    <PostHolder postList={componentList} userLocation={localUserLocation}/>
+                </ScrollView>
+                <PostButtonComponent EventID={localEventID} WithinRange={withinRange}/>
+            </View>
+        )
+    }
 }
 
 type PostButtonProps = {
@@ -136,8 +147,14 @@ const styles = StyleSheet.create({
 
     header: {
         textAlign:'center',
-        paddingTop: 20,
+        paddingTop: 25,
         paddingBottom: 20,
         fontSize:36
+    },
+
+    noPostText: {
+        textAlign: 'center',
+        fontSize: 22,
+        marginTop:25
     }
 })

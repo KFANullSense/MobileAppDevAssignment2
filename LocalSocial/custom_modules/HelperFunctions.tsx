@@ -61,7 +61,7 @@ export function ConvertEventListToProps(inputData: Array<JSON>) {
     var propList: EventProps[] = [];
 
     inputData.map(localEvent => {
-        propList.push({eventName: localEvent.event_name, eventDescription: localEvent.event_description, startTime: localEvent.event_starttime, endTime: localEvent.event_endtime, eventID: localEvent.event_id, eventLocation: localEvent.event_location});
+        propList.push({eventName: localEvent.event_name, eventDescription: localEvent.event_description, startTime: localEvent.event_starttime, endTime: localEvent.event_endtime, eventID: localEvent.event_id, eventLocation: localEvent.event_location, eventImageURL: localEvent.event_image_url});
     })
 
     return propList;
@@ -70,7 +70,7 @@ export function ConvertEventListToProps(inputData: Array<JSON>) {
 export function ConvertEventDetailsToProp(inputData: Array<JSON>) {
     const eventJSON: JSON = inputData[0];
 
-    const returnProp: EventProps = {eventName: eventJSON.event_name, eventDescription: eventJSON.event_description, startTime: eventJSON.event_starttime, endTime: eventJSON.event_endtime, eventID: eventJSON.event_id, eventLocation: eventJSON.event_location};
+    const returnProp: EventProps = {eventName: eventJSON.event_name, eventDescription: eventJSON.event_description, startTime: eventJSON.event_starttime, endTime: eventJSON.event_endtime, eventID: eventJSON.event_id, eventLocation: eventJSON.event_location, eventImageURL: eventJSON.event_image_url};
 
     return returnProp;
 }

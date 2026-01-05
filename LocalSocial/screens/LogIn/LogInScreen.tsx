@@ -23,13 +23,13 @@ export default function LogInScreen(props: LogInScreenProps) {
         <View style={styles.container}>
             <Header/>
             <View style={styles.loginContainer}>
-                <TextInput style={styles.loginTextbox} placeholder="Username" onChangeText={(value) => setUsername(value)}/>
-                <TextInput style={styles.loginTextbox} placeholder="Password" onChangeText={(value) => setPassword(value)}/>
+                <TextInput style={styles.loginTextbox} placeholder="Username" onChangeText={(value) => setUsername(value)} autoCapitalize='none'/>
+                <TextInput style={styles.loginTextbox} placeholder="Password" onChangeText={(value) => setPassword(value)} secureTextEntry={true} autoCapitalize='none'/>
                 <Pressable style={styles.loginButton} onPress={async () => {props.updateIDFunc(await LogInToUser({username: username, password: password}))}}>
-                    <Text>Log In</Text>
+                    <Text style={styles.loginButtonText}>Log In</Text>
                 </Pressable>
                 <Pressable style={styles.loginButton} onPress={async() => {props.updateIDFunc(await CreateUser({username: username, password:password}))}}>
-                    <Text>Register</Text>
+                    <Text style={styles.loginButtonText}>Register</Text>
                 </Pressable>
             </View>
         </View>
@@ -40,11 +40,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: BackgroundColour,
+        justifyContent:'center'
     },
     header: {
         justifyContent: 'center',
         alignItems: 'center',
-        paddingTop: 20,
         paddingBottom: 20
     },
     loginContainer: {
@@ -53,14 +53,20 @@ const styles = StyleSheet.create({
     loginTextbox: {
         backgroundColor: '#ffffff',
         width: '80%',
-        margin:5
+        margin:5,
+        padding:15,
+        fontSize:18
     },
     loginButton: {
         backgroundColor: ButtonColour,
-        width: '80%',
-        height: 30,
         alignItems: 'center',
+        justifyContent:'center',
         margin:5,
-        borderRadius:10
+        borderRadius:10,
+        padding:20
+    },
+
+    loginButtonText: {
+        fontSize:20
     }
 })

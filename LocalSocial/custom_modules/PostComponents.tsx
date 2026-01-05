@@ -97,7 +97,7 @@ export function PostObject(props: PostProps) {
         <Pressable onPress={() => navigation.navigate("Post Details", {postID: props.postID, userLocation: props.userLocation})}>
             <View style={postStyles.container}>
                 <View style={postStyles.titleContents}>
-                    <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={postStyles.authorImage} resizeMode="cover"/>
+                    <Image source={{uri:props.authorPictureURL}} style={postStyles.authorImage} resizeMode="cover"/>
                     <View style={postStyles.titleTextBox}>
                         <View style={postStyles.titleTextAlign}>
                             <Text style={postStyles.authorText} numberOfLines={1}>{props.authorName}</Text>
@@ -150,6 +150,7 @@ export function EventHolder(props: EventHolderProps) {
                 endTime={localEvent.endTime}
                 eventID={localEvent.eventID}
                 eventLocation={localEvent.eventLocation}
+                eventImageURL={localEvent.eventImageURL}
                 key={i}
             />)}
         </View>
@@ -163,6 +164,7 @@ export type EventProps = {
     endTime: string;
     eventID: number;
     eventLocation: string;
+    eventImageURL: string;
 }
 
 export function EventObject(props: EventProps) {
@@ -178,13 +180,27 @@ export function EventObject(props: EventProps) {
                             <Text style={eventStyles.contentsText}>Start: {props.startTime}</Text>
                             <Text style={eventStyles.contentsText}>End: {props.endTime}</Text>
                         </View>
-                        <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={eventStyles.contentsImage} resizeMode="cover"/>
+                        <EventContentImage imageURL={props.eventImageURL}/>
                     </View>
                     <Text style={eventStyles.contentsText}>{props.eventDescription}</Text>
                 </View>
             </View>
         </Pressable>
     )
+}
+
+function EventContentImage(props: ImageURLType) {
+    if (props.imageURL == "") {
+        return (
+            <View>
+
+            </View>
+        )
+    } else {
+        return (
+            <Image source={{uri:props.imageURL}} style={eventStyles.contentsImage} resizeMode="cover"/>
+        )
+    }
 }
 
 export type FriendHolderProps = {
@@ -220,7 +236,7 @@ export function FriendObject(props: FriendObjectProps) {
     return (
         <Pressable onPress={() => navigation.navigate("User Details", {userID: props.profileID})}>
             <View style={friendStyles.container}>
-                <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={friendStyles.profilePicture} resizeMode="cover"/>
+                <Image source={{uri:props.profile_picture_url}} style={friendStyles.profilePicture} resizeMode="cover"/>
                 <View style={friendStyles.textColumn}>
                     <Text style={friendStyles.usernameText}>{props.username}</Text>
                     <Text style={friendStyles.profileStatusText}>{props.user_status}</Text>
@@ -257,7 +273,7 @@ export function CommentObject(props: CommentProps) {
     return (
         <View style={commentStyles.container}>
             <View style={commentStyles.contentRow}>
-                <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={commentStyles.authorImage} resizeMode="cover"/>
+                <Image source={{uri:props.authorPictureURL}} style={commentStyles.authorImage} resizeMode="cover"/>
                 <View style={commentStyles.textColumn}>
                     <Text>{props.authorName}</Text>
                     <Text style={commentStyles.commentText}>{props.commentText}</Text>

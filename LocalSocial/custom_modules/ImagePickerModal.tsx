@@ -44,7 +44,7 @@ export function ImagePicker(props: ImagePickerProps) {
         onRequestClose={() => props.setModalVisible(false)}>
             <View style={editButtonStyles.modalContainer}>
                 <View style={editButtonStyles.modalView}>
-                    <Image source={{uri:localImageURI}} style={styles.holderImage} resizeMode="cover"/>
+                    <Image source={{uri:localImageURI}} style={styles.holderImage} resizeMode="contain"/>
                     <View style={styles.buttonContainer}>
                         <Pressable style={editButtonStyles.modalButton} onPress={async () => {PickImage();}}>
                             <Text style={styles.buttonText}>Select Image</Text>
@@ -71,7 +71,7 @@ export function ImagePlaceholder(props: ImagePlaceholdeProps) {
     if (props.localImageURI == "") {
         return (
             <Pressable onPress={() => props.setModalVisibleFunc(true)}>
-                <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={styles.holderImage} resizeMode="cover"/>
+                <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={styles.holderImage} resizeMode="contain"/>
             </Pressable>
         )
     } else {
@@ -86,10 +86,10 @@ export function ImagePlaceholder(props: ImagePlaceholdeProps) {
 const styles = StyleSheet.create({
     holderImage: {
         borderRadius:15,
-        maxHeight:250,
-        width:'95%',
-        aspectRatio:1,
-        marginTop:10
+        width:250,
+        height:175,
+        resizeMode:'contain',
+        margin:20
     },
 
     buttonContainer: {

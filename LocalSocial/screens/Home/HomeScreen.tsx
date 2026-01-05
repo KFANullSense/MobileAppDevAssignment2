@@ -6,6 +6,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import CreatePostScreen from "../MyEvents/CreatePostScreen";
 import EventPostsScreen from "../MyEvents/EventPostsScreen";
 import FullEventScreen from "../MyEvents/FullEventScreen";
@@ -56,21 +57,21 @@ export function HomeScreen(props: GlobalUserIDProps) {
 
     if (holderData.length==0) {
         return (
-            <View style={styles.container}>
+            <SafeAreaView style={styles.container}>
                 <Header/>
                 <BorderLine/>
-                <Text style={styles.noEventText}>You aren't in any events! Go to Browse to find events nearby.</Text>
-            </View>
+                <Text style={styles.noEventText}>You aren't in any events, or joined events have no posts! Go to Browse to find events nearby, and my events to view and post in events you have joined.</Text>
+            </SafeAreaView>
         )
     } else {
         return (
-            <View style={styles.container}>
+            <SafeAreaView style={styles.container}>
                 <Header/>
                 <BorderLine/>
                 <ScrollView>
                     <HomePostRoot holderList={holderData}/>
                 </ScrollView>
-            </View>
+            </SafeAreaView>
         )
     }
 }
@@ -90,7 +91,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignSelf: 'center',
         alignItems:'center',
-        paddingTop: 30,
+        paddingTop: 25,
         paddingBottom: 15,
     },
     noEventText: {

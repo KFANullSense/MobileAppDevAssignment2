@@ -1,5 +1,7 @@
 import { supabase } from '@/lib/supabase';
 
+export const defaultProfilePictureURL = "https://kfsnhareeqqsrlnwylox.supabase.co/storage/v1/object/public/files/public/emptypfp.jpg";
+
 type UserDetailsProps = {
     username: string;
     password: string;
@@ -7,8 +9,6 @@ type UserDetailsProps = {
 
 //Create a user, then immediately log into them
 export async function CreateUser(props: UserDetailsProps) {
-    const defaultProfilePictureURL = "https://kfsnhareeqqsrlnwylox.supabase.co/storage/v1/object/public/files/public/emptypfp.jpg";
-
     console.log("Attempting to create user with username " + props.username + " and password " + props.password);
 
     const usernameAvailable = await CheckIfUsernameAvailable(props.username);
@@ -151,12 +151,12 @@ export async function GetJoinedEvents(props: UserIDProps) {
 export async function GetUserLikeCount(props: UserIDProps) {
     console.log("Returning like count from user", props.userID);
 
-    const {count, error} = await supabase.rpc("getuserlikes", {input_user_id: props.userID});
+    const {data, error} = await supabase.rpc("getuserlikes", {input_user_id: props.userID});
 
     if (error) {
         console.error("Error retrieving follower count:", error);
     } else {
-        return count;
+        return data;
     }
 
     return -1;
@@ -384,13 +384,14 @@ type EventCreationProps = {
     eventStartTime: string;
     eventEndTime: string;
     userID: number;
+    eventImageURL: string;
 }
 
 //Creates event with specified details
 export async function CreateEvent(props: EventCreationProps) {
     console.log("Atempting to create event");
 
-    const {error} = await supabase.rpc("createevent", {eventname: props.eventName, eventdescription: props.eventDescription, eventlocation: props.positionString, starttime: props.eventStartTime, endtime: props.eventEndTime, userid: props.userID});
+    const {error} = await supabase.rpc("createevent", {eventname: props.eventName, eventdescription: props.eventDescription, eventlocation: props.positionString, starttime: props.eventStartTime, endtime: props.eventEndTime, userid: props.userID, eventimageurl: props.eventImageURL});
 
     if (error) {
         console.error("Error creating event:", error);

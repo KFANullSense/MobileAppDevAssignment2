@@ -1,12 +1,14 @@
 import { GlobalUserIDProps } from "@/app";
 import { BackgroundColour, ButtonColour, editButtonStyles, HolderColour } from "@/custom_modules/CustomStyles";
-import { CheckIfUserFollowing, FollowUser, GetFollowerCount, GetFollowingCount, GetPostCount, GetUserLikeCount, ReturnUserDetails, UnfollowUser, UpdateUsername, UpdateUserStatus } from "@/custom_modules/DBConnect";
+import { CheckIfUserFollowing, defaultProfilePictureURL, FollowUser, GetFollowerCount, GetFollowingCount, GetPostCount, GetUserLikeCount, ReturnUserDetails, UnfollowUser, UpdateUsername, UpdateUserProfilePicture, UpdateUserStatus, UploadImage } from "@/custom_modules/DBConnect";
 import { ConvertProfileDetailsToProps, RetrieveRecentPostsByUser } from "@/custom_modules/HelperFunctions";
+import { ImagePicker } from "@/custom_modules/ImagePickerModal";
 import { BorderLine, HomePostHolderProps, HomePostRoot } from "@/custom_modules/PostComponents";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useFocusEffect, useRoute } from "@react-navigation/native";
 import { useCallback, useRef, useState } from "react";
 import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export type ProfileProps = {
     profileID: number;
@@ -22,7 +24,7 @@ type ProfileScreenProps = {
 
 export function FullProfileScreen(props: ProfileScreenProps) {
     var localProfileID = -1; 
-    const [profileData, setProfileData] = useState<ProfileProps>({profileID: -1, profilePictureURL: "", username: "Loading...", userStatus: ""});
+    const [profileData, setProfileData] = useState<ProfileProps>({profileID: -1, profilePictureURL: defaultProfilePictureURL, username: "Loading...", userStatus: ""});
     const [userLikes, setUserLikes] = useState(0);
     const [userFollowing, setUserFollowing] = useState(0);
     const [userFollowers, setUserFollowers] = useState(0);
@@ -49,16 +51,16 @@ export function FullProfileScreen(props: ProfileScreenProps) {
         }
 
         const localUserLikes = await GetUserLikeCount({userID: localProfileID});
-        if (localUserLikes) {setUserLikes(localUserLikes);}
+        if (localUserLikes != null) {setUserLikes(localUserLikes);}
 
         const localUserFollowing = await GetFollowingCount({userID: localProfileID});
-        if (localUserFollowing) {setUserFollowing(localUserFollowing);}
+        if (localUserFollowing != null) {setUserFollowing(localUserFollowing);}
 
         const localUserFollowers = await GetFollowerCount({userID: localProfileID});
-        if (localUserFollowers) {setUserFollowers(localUserFollowers);}
+        if (localUserFollowers != null) {setUserFollowers(localUserFollowers);}
 
         const localPostNum = await GetPostCount({userID: localProfileID});
-        if (localPostNum) {setUserPostNum(localPostNum);}
+        if (localPostNum != null) {setUserPostNum(localPostNum);}
 
         const hasUserFollowed = await CheckIfUserFollowing({localUserID: props.userID, userToFollowID: localProfileID});
         setIsFollowing(hasUserFollowed);
@@ -75,9 +77,9 @@ export function FullProfileScreen(props: ProfileScreenProps) {
 
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <UsernameHeader userID={props.userID} isOwner={isProfileOwner} profileData={profileData} successFunction={FetchData} setIsFollowingFunction={setIsFollowing} isFollowing={isFollowing}/>
-            <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={styles.profilePicture} resizeMode="cover"/>
+            <ProfilePictureDisplay userID={props.userID} isOwner={isProfileOwner} profileData={profileData} successFunction={FetchData}/>
             <View style={styles.userStatsRow}>
                 <Text style={styles.userStatText}>{userLikes} Likes</Text>
                 <Text style={styles.userStatText}>{userPostNum} Posts</Text>
@@ -93,7 +95,7 @@ export function FullProfileScreen(props: ProfileScreenProps) {
                 <Text style={styles.recentPostsText}>Recent Posts</Text>
                 <ProfilePosts userID={localProfileID}/>
             </View>
-        </View>
+        </SafeAreaView>
     )
 }
 
@@ -172,6 +174,48 @@ function UsernameHeader(props:ProfileEditFollowModalProps) {
             <View style={editButtonStyles.editRow}>
                 <Text style={styles.header}>{props.profileData.username}</Text>
                 <FollowButton localUserID={props.userID} followUserID={props.profileData.profileID} isFollowing={props.isFollowing} setIsFollowingFunction={props.setIsFollowingFunction}/>
+            </View>
+        )
+    }
+}
+
+function ProfilePictureDisplay(props:ProfileEditModalProps) {
+    const [imageModalVisible, setImageModalVisible] = useState(false);
+
+    async function ModalUpdateProfilePicture(newImageURL: string) {
+        if (newImageURL == "") {
+            console.error("Must select an image to set as profile picture!");
+            return;
+        }
+        
+        const imagePath = await UploadImage({userID: props.userID, imageURI: newImageURL});
+
+        if (imagePath) {
+            const result = await UpdateUserProfilePicture({userID: props.userID, newString: newImageURL});
+
+            if (result) {
+                props.successFunction();
+            }
+        }
+    }
+
+    if (props.isOwner) {
+        return (
+            <View>
+                <View style={editButtonStyles.editRowStretch}>
+                    <ImagePicker modalVisible={imageModalVisible} setModalVisible={setImageModalVisible} updateImageFunc={ModalUpdateProfilePicture}/>
+
+                    <Image source={{uri:props.profileData.profilePictureURL}} style={styles.profilePicture} resizeMode="cover"/>
+                    <Pressable style={editButtonStyles.editButton} onPress={() => setImageModalVisible(true)}>
+                        <FontAwesome5 name="edit" size={15}/>
+                    </Pressable>
+                </View>
+            </View>
+        )
+    } else {
+        return (
+            <View>
+                <Image source={{uri:props.profileData.profilePictureURL}} style={styles.profilePicture} resizeMode="cover"/>
             </View>
         )
     }
@@ -258,7 +302,7 @@ function ProfilePosts(props: GlobalUserIDProps) {
     if (holderData.length==0) {
         return (
             <View style={styles.postContainer}>
-                <Text>User hasn't made any posts yet!</Text>
+                <Text style={styles.noPostsText}>User hasn't made any posts yet!</Text>
             </View>
         )
     } else {
@@ -322,7 +366,7 @@ const styles = StyleSheet.create({
     header: {
         justifyContent: 'center',
         alignSelf: 'center',
-        paddingTop: 30,
+        paddingTop: 15,
         paddingBottom: 20,
         fontSize:36
     },
@@ -380,5 +424,9 @@ const styles = StyleSheet.create({
         padding:10,
         borderRadius:10,
         marginLeft:15
+    },
+    noPostsText: {
+        margin:10,
+        alignSelf:'center',
     }
 })

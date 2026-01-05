@@ -1,7 +1,8 @@
 import { GlobalUserIDProps } from "@/app";
 import { BackgroundColour, ButtonColour } from "@/custom_modules/CustomStyles";
-import { CreateEvent } from "@/custom_modules/DBConnect";
+import { CreateEvent, UploadImage } from "@/custom_modules/DBConnect";
 import { ConvertDateTimeForSQL, GetCurrentLocationForSQL } from "@/custom_modules/HelperFunctions";
+import { ImagePicker, ImagePlaceholder } from "@/custom_modules/ImagePickerModal";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
@@ -28,6 +29,10 @@ export default function CreateEventScreen(props: GlobalUserIDProps) {
     const hideEndDatePicker = () => { setEndDatePickerVisible(false); }
     const confirmEndDatePicker = (value) => { setEndTime(value); hideEndDatePicker();}
 
+    const [localImage, setLocalImage] = useState("");
+    
+    const [imageModalVisible, setImageModalVisible] = useState(false);
+
     async function ValidateInput() {
         if (title.length == 0 || description.length == 0) {
             console.error("Title and description cannot be empty")
@@ -43,10 +48,26 @@ export default function CreateEventScreen(props: GlobalUserIDProps) {
                     if (locationValue == "") {
                         console.error("Error while fetching location");
                     } else {
-                        const result = await CreateEvent({eventName: title, eventDescription: description, positionString: locationValue, eventStartTime: ConvertDateTimeForSQL(startTime), eventEndTime: ConvertDateTimeForSQL(endTime), userID: props.userID})
+                        var currImage = "";
+                        var imageSuccess = true;
 
-                        if (result == true) {
-                            navigation.goBack();
+                        if (localImage != "") {
+                            imageSuccess = false;
+        
+                            const imagePath = await UploadImage({userID: props.userID, imageURI: localImage});
+        
+                            if (imagePath) {
+                                currImage = imagePath;
+                                imageSuccess = true;
+                            }
+                        }
+        
+                        if (imageSuccess == true) {
+                            const result = await CreateEvent({eventName: title, eventDescription: description, positionString: locationValue, eventStartTime: ConvertDateTimeForSQL(startTime), eventEndTime: ConvertDateTimeForSQL(endTime), userID: props.userID, eventImageURL: currImage})
+        
+                            if (result == true) {
+                                navigation.goBack();
+                            }
                         }
                     }
                 }
@@ -57,7 +78,10 @@ export default function CreateEventScreen(props: GlobalUserIDProps) {
     return (
         <View style={styles.container}>
             <View style = {styles.eventCreateHolder}>
+                <ImagePicker modalVisible={imageModalVisible} setModalVisible={setImageModalVisible} updateImageFunc={setLocalImage}/>
+
                 <TextInput style={styles.titleInput} placeholder="Event Title" onChangeText={(value) => setTitle(value)}/>
+                <ImagePlaceholder localImageURI={localImage} setModalVisibleFunc={setImageModalVisible}/>
                 <TextInput style={styles.descriptionInput} multiline placeholder="Event Description" onChangeText={(value) => setDescription(value)}/>
 
                 <Pressable onPress={showStartDatePicker} style={styles.dateTimeButton}>
@@ -94,15 +118,18 @@ const styles = StyleSheet.create({
     titleInput: {
         backgroundColor:'#ffff',
         width:'90%',
-        marginTop:15
+        marginTop:40,
+        padding:15,
+        fontSize:18
     },
 
     descriptionInput: {
         backgroundColor:'#ffff',
         width:'90%',
         height:150,
-        marginTop:15,
-        textAlignVertical:'top'
+        textAlignVertical:'top',
+        padding:15,
+        fontSize:18
     },
 
     floatingContainer: {

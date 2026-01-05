@@ -3,10 +3,11 @@ import { BackgroundColour } from "@/custom_modules/CustomStyles";
 import { GetFollowingList } from "@/custom_modules/DBConnect";
 import { ConvertUserListToProps } from "@/custom_modules/HelperFunctions";
 import { BorderLine, FriendHolder, FriendObjectProps } from "@/custom_modules/PostComponents";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useFocusEffect } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import CreatePostScreen from "../MyEvents/CreatePostScreen";
 import EventPostsScreen from "../MyEvents/EventPostsScreen";
 import FullEventScreen from "../MyEvents/FullEventScreen";
@@ -37,7 +38,6 @@ export default function RootScreen(props: GlobalUserIDProps) {
 function FriendsScreen (props: GlobalUserIDProps) {
     const [componentList, setComponentList] = useState<FriendObjectProps[]>([]);
 
-    const navigation = useNavigation();
 
     useFocusEffect(useCallback(() => {
         const fetchUsers = async () => {
@@ -59,21 +59,21 @@ function FriendsScreen (props: GlobalUserIDProps) {
 
     if (componentList.length == 0) {
         return (
-            <View style={styles.container}>
+            <SafeAreaView style={styles.container}>
                 <Header/>
                 <BorderLine/>
                 <Text style={styles.noUsersText}>You aren't following any users yet. Go to events to find some!</Text>
-            </View>
+            </SafeAreaView>
         )
     } else {
         return (
-            <View style={styles.container}>
+            <SafeAreaView style={styles.container}>
                 <Header/>
                 <BorderLine/>
                 <ScrollView style={styles.friendHolderContainer}>
                     <FriendHolder friendList={componentList}/>
                 </ScrollView>
-            </View>
+            </SafeAreaView>
         )
     }
 }
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     header: {
         justifyContent: 'center',
         alignItems: 'center',
-        paddingTop: 20,
+        paddingTop: 25,
         paddingBottom: 20
     },
 

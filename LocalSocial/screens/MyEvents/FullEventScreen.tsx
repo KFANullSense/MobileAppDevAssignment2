@@ -2,7 +2,7 @@ import { GlobalUserIDProps } from "@/app";
 import { BackgroundColour, ButtonColour, editButtonStyles, HolderColour } from "@/custom_modules/CustomStyles";
 import { DeleteEvent, HasUserJoinedEvent, IsUserHostOfEvent, JoinEvent, LeaveEvent, ReturnFullEvent, UpdateEventDescription, UpdateEventName } from "@/custom_modules/DBConnect";
 import { CheckDistance, ConvertEventDetailsToProp, ConvertSQLCoordsToNumber, GetCurrentLocationCoords } from "@/custom_modules/HelperFunctions";
-import { BorderLine, EventProps } from "@/custom_modules/PostComponents";
+import { BorderLine, EventProps, ImageURLType } from "@/custom_modules/PostComponents";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import { useCallback, useRef, useState } from "react";
@@ -13,7 +13,7 @@ export default function FullEventScreen(props: GlobalUserIDProps) {
     const params = useRoute().params;
     const localEventID = params.eventID;
 
-    const [eventDetails, setEventDetails] = useState<EventProps>({eventName: "Loading...", eventDescription: "Loading...", eventID: -1, eventLocation: "", startTime: "", endTime: ""});
+    const [eventDetails, setEventDetails] = useState<EventProps>({eventName: "Loading...", eventDescription: "Loading...", eventID: -1, eventLocation: "", startTime: "", endTime: "", eventImageURL:""});
     const [isHost, setIsHost] = useState(false);
     const [withinRange, setWithinRange] = useState(false);
     
@@ -48,7 +48,7 @@ export default function FullEventScreen(props: GlobalUserIDProps) {
             <EventNameDisplay eventID={localEventID} isOwner={isHost} eventData={eventDetails} successFunction={FetchData}/>
             <BorderLine/>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={styles.eventImage} resizeMode="cover"/>
+                <ContentImage imageURL={eventDetails.eventImageURL}/>
                 <View style={styles.eventDatesHolder}>
                     <Text style={styles.eventDatesText}>Start Time: {eventDetails?.startTime}</Text>
                     <Text style={styles.eventDatesText}>End Time: {eventDetails?.endTime}</Text>
@@ -60,6 +60,16 @@ export default function FullEventScreen(props: GlobalUserIDProps) {
             </ScrollView>
         </View>
     )
+}
+
+function ContentImage(props: ImageURLType) {
+    if (props.imageURL == "") {
+        return <View></View>
+    } else {
+        return (
+            <Image source={{uri:props.imageURL}} style={styles.eventImage} resizeMode="contain"/>
+        )
+    }
 }
 
 type EventEditModalProps = {
@@ -290,7 +300,8 @@ const styles = StyleSheet.create({
     header: {
         alignSelf:'center',
         textAlign:'center',
-        margin:10
+        margin:10,
+        paddingTop:25
     },
 
     eventNameText: {
