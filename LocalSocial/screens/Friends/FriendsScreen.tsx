@@ -13,6 +13,7 @@ import EventPostsScreen from "../MyEvents/EventPostsScreen";
 import FullEventScreen from "../MyEvents/FullEventScreen";
 import FullPostScreen from "../MyEvents/FullPostScreen";
 import { FullProfileScreen } from "../Profile/FullProfileScreen";
+import ChatScreen from "./ChatScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +26,7 @@ function RootStack(props:GlobalUserIDProps) {
             <Stack.Screen name="Create Post" children={() => <CreatePostScreen userID={props.userID}/>}/>
             <Stack.Screen name="Post Details" children={() => <FullPostScreen  userID={props.userID}/>}/>
             <Stack.Screen name="User Details" children={() => <FullProfileScreen userID={props.userID} userProfileID={null}/>}/>
+            <Stack.Screen name="Message User" children={() => <ChatScreen userID={props.userID}/>}/>
         </Stack.Navigator>
     )
 }

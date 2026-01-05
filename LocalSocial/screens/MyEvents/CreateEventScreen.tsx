@@ -2,7 +2,7 @@ import { GlobalUserIDProps } from "@/app";
 import { BackgroundColour, ButtonColour } from "@/custom_modules/CustomStyles";
 import { CreateEvent, UploadImage } from "@/custom_modules/DBConnect";
 import { ConvertDateTimeForSQL, GetCurrentLocationForSQL } from "@/custom_modules/HelperFunctions";
-import { ImagePicker, ImagePlaceholder } from "@/custom_modules/ImagePickerModal";
+import { ImagePicker, ImagePlaceholder, LoadingModal } from "@/custom_modules/ImagePickerModal";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
@@ -32,6 +32,7 @@ export default function CreateEventScreen(props: GlobalUserIDProps) {
     const [localImage, setLocalImage] = useState("");
     
     const [imageModalVisible, setImageModalVisible] = useState(false);
+    const [loadingModalVisible, setLoadingModalVisible] = useState(false);
 
     async function ValidateInput() {
         if (title.length == 0 || description.length == 0) {
@@ -79,6 +80,7 @@ export default function CreateEventScreen(props: GlobalUserIDProps) {
         <View style={styles.container}>
             <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
                 <View style = {styles.eventCreateHolder}>
+                    <LoadingModal modalVisible={loadingModalVisible}/>
                     <ImagePicker modalVisible={imageModalVisible} setModalVisible={setImageModalVisible} updateImageFunc={setLocalImage}/>
 
                     <TextInput style={styles.titleInput} placeholder="Event Title" onChangeText={(value) => setTitle(value)}/>

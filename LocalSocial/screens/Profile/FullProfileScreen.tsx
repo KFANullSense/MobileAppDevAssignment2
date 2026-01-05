@@ -42,6 +42,11 @@ export function FullProfileScreen(props: ProfileScreenProps) {
 
     const isProfileOwner = (localProfileID == props.userID);
 
+    async function FetchFollowerCount() {
+        const localUserFollowers = await GetFollowerCount({userID: localProfileID});
+        if (localUserFollowers != null) {setUserFollowers(localUserFollowers);}
+    }
+
     async function FetchData() {
         const localProfileData = await ReturnUserDetails({userID: localProfileID});
             
@@ -56,9 +61,6 @@ export function FullProfileScreen(props: ProfileScreenProps) {
         const localUserFollowing = await GetFollowingCount({userID: localProfileID});
         if (localUserFollowing != null) {setUserFollowing(localUserFollowing);}
 
-        const localUserFollowers = await GetFollowerCount({userID: localProfileID});
-        if (localUserFollowers != null) {setUserFollowers(localUserFollowers);}
-
         const localPostNum = await GetPostCount({userID: localProfileID});
         if (localPostNum != null) {setUserPostNum(localPostNum);}
 
@@ -68,6 +70,7 @@ export function FullProfileScreen(props: ProfileScreenProps) {
 
     useFocusEffect(useCallback(() => {
         FetchData();
+        FetchFollowerCount();
 
         return () => {
 
@@ -78,7 +81,7 @@ export function FullProfileScreen(props: ProfileScreenProps) {
 
     return (
         <SafeAreaView style={styles.container}>
-            <UsernameHeader userID={props.userID} isOwner={isProfileOwner} profileData={profileData} successFunction={FetchData} setIsFollowingFunction={setIsFollowing} isFollowing={isFollowing}/>
+            <UsernameHeader userID={props.userID} isOwner={isProfileOwner} profileData={profileData} successFunction={FetchData} setIsFollowingFunction={setIsFollowing} isFollowing={isFollowing} fetchFollowersFunction={FetchFollowerCount}/>
             <ProfilePictureDisplay userID={props.userID} isOwner={isProfileOwner} profileData={profileData} successFunction={FetchData}/>
             <View style={styles.userStatsRow}>
                 <Text style={styles.userStatText}>{userLikes} Likes</Text>
@@ -112,7 +115,8 @@ type ProfileEditFollowModalProps = {
     profileData: ProfileProps;
     successFunction: Function;
     isFollowing: boolean;
-    setIsFollowingFunction: (newValue: boolean) => void; 
+    setIsFollowingFunction: (newValue: boolean) => void;
+    fetchFollowersFunction: Function;
 }
 
 
@@ -162,7 +166,7 @@ function UsernameHeader(props:ProfileEditFollowModalProps) {
                                 </Pressable>
                             </View>
                         </View>
-                        </TouchableWithoutFeedback>
+                    </TouchableWithoutFeedback>
                 </Modal>
 
                 <Text style={styles.header}>{props.profileData.username}</Text>
@@ -175,7 +179,7 @@ function UsernameHeader(props:ProfileEditFollowModalProps) {
         return (
             <View style={editButtonStyles.editRow}>
                 <Text style={styles.header}>{props.profileData.username}</Text>
-                <FollowButton localUserID={props.userID} followUserID={props.profileData.profileID} isFollowing={props.isFollowing} setIsFollowingFunction={props.setIsFollowingFunction}/>
+                <FollowButton localUserID={props.userID} followUserID={props.profileData.profileID} isFollowing={props.isFollowing} setIsFollowingFunction={props.setIsFollowingFunction} fetchFollowerFunction={props.fetchFollowersFunction}/>
             </View>
         )
     }
@@ -329,16 +333,16 @@ type FollowButtonProps = {
     followUserID: number;
     isFollowing: boolean;
     setIsFollowingFunction: (newValue: boolean) => void; 
+    fetchFollowerFunction: Function;
 }
 
 function FollowButton(props: FollowButtonProps) {
-    
-
     async function FollowUserPress() {
         const result = await FollowUser({localUserID: props.localUserID, userToFollowID: props.followUserID});
 
         if (result) {
             props.setIsFollowingFunction(true);
+            props.fetchFollowerFunction();
         }
     }
 
@@ -347,6 +351,7 @@ function FollowButton(props: FollowButtonProps) {
 
         if (result) {
             props.setIsFollowingFunction(false);
+            props.fetchFollowerFunction();
         }
     }
 

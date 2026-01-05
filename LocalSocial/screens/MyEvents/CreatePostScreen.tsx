@@ -2,7 +2,7 @@ import { GlobalUserIDProps } from "@/app";
 import { BackgroundColour, ButtonColour } from "@/custom_modules/CustomStyles";
 import { CreatePost, UploadImage } from "@/custom_modules/DBConnect";
 import { GetCurrentLocationForSQL } from "@/custom_modules/HelperFunctions";
-import { ImagePicker, ImagePlaceholder } from "@/custom_modules/ImagePickerModal";
+import { ImagePicker, ImagePlaceholder, LoadingModal } from "@/custom_modules/ImagePickerModal";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import React, { useState } from "react";
@@ -19,6 +19,7 @@ export default function CreatePostScreen(props: GlobalUserIDProps) {
     const [localImage, setLocalImage] = useState("");
 
     const [imageModalVisible, setImageModalVisible] = useState(false);
+    const [loadingModalVisible, setLoadingModalVisible] = useState(false);
 
     async function ValidateInput() {
         if (title.length == 0 || body.length == 0) {
@@ -58,6 +59,7 @@ export default function CreatePostScreen(props: GlobalUserIDProps) {
     return (
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
             <View style={styles.container}>
+                <LoadingModal modalVisible={loadingModalVisible}/>
                 <ImagePicker modalVisible={imageModalVisible} setModalVisible={setImageModalVisible} updateImageFunc={setLocalImage}/>
 
                 <View style = {styles.eventCreateHolder}>

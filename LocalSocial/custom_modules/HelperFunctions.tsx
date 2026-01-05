@@ -2,7 +2,7 @@ import { ProfileProps } from '@/screens/Profile/FullProfileScreen';
 import * as Location from 'expo-location';
 import getDistance from 'geolib/es/getDistance';
 import { CheckIfUsersAreMutuallyFollowing, GetJoinedEvents, GetRecentPostsFromEvent, GetRecentPostsFromEventByUser, ReturnUserDetails } from './DBConnect';
-import { CommentProps, EventProps, FriendObjectProps, HomePostHolderProps, PostProps } from './PostComponents';
+import { CommentProps, EventProps, FriendObjectProps, HomePostHolderProps, MessageProps, PostProps } from './PostComponents';
 
 export function ConvertDateTimeForSQL(inputDate: Date) {
     //get month returns one less, add one to be correct (not sure why only month does this and not the others? oh well)
@@ -76,11 +76,9 @@ export function ConvertEventDetailsToProp(inputData: Array<JSON>) {
 }
 
 export async function ConvertPostListToProps(inputData: Array<JSON>) {
-    const localUserLocation = await GetCurrentLocationCoords();
-
     const requests = await Promise.all(inputData.map(async (localPost) => {
         const localPostAuthor = await ReturnUserDetails({userID: localPost.user_id});
-        const localPostProps: PostProps = {postTitle: localPost.post_title, postBody: localPost.post_body, postMediaURL: localPost.post_image_url, authorName: localPostAuthor[0].username, authorPictureURL: localPostAuthor[0].profile_picture_url, postID: localPost.post_id, location: localPost.post_location, userLocation: localUserLocation, authorID: localPost.user_id};
+        const localPostProps: PostProps = {postTitle: localPost.post_title, postBody: localPost.post_body, postMediaURL: localPost.post_image_url, authorName: localPostAuthor[0].username, authorPictureURL: localPostAuthor[0].profile_picture_url, postID: localPost.post_id, location: localPost.post_location, userLocation: {latitude:0, longitude:0}, authorID: localPost.user_id};
         return(localPostProps);
     }));
 
@@ -113,13 +111,11 @@ export async function ConvertCommentListToProps(inputData: Array<JSON>) {
 export async function RetrieveRecentPostsForUser(localUserID: number) {
     const eventData: Array<JSON> = await GetJoinedEvents({userID: localUserID});
 
-    const localUserLocation = await GetCurrentLocationCoords();
-
     const requests = await Promise.all(eventData.map(async (localEvent) => {
         const localEventProps = ConvertEventDetailsToProp([localEvent]);
         const localPostData = await GetRecentPostsFromEvent({eventID: localEventProps.eventID});
         const localPostPropsList: PostProps[] = await ConvertPostListToProps(localPostData);
-        const localHomePostProps: HomePostHolderProps = {postList: localPostPropsList, eventProps: localEventProps, userLocation: localUserLocation};
+        const localHomePostProps: HomePostHolderProps = {postList: localPostPropsList, eventProps: localEventProps, userLocation: {latitude:0, longitude:0}};
 
         return localHomePostProps;
     }));
@@ -130,8 +126,6 @@ export async function RetrieveRecentPostsForUser(localUserID: number) {
 export async function RetrieveRecentPostsByUser(localUserID: number) {
     const eventData: Array<JSON> = await GetJoinedEvents({userID: localUserID});
 
-    const localUserLocation = await GetCurrentLocationCoords();
-
     const requests = await Promise.all(eventData.map(async (localEvent) => {
         const localEventProps = ConvertEventDetailsToProp([localEvent]);
         const localPostData = await GetRecentPostsFromEventByUser({eventID: localEventProps.eventID, userID: localUserID});
@@ -140,7 +134,7 @@ export async function RetrieveRecentPostsByUser(localUserID: number) {
         }
 
         const localPostPropsList: PostProps[] = await ConvertPostListToProps(localPostData);
-        const localHomePostProps: HomePostHolderProps = {postList: localPostPropsList, eventProps: localEventProps, userLocation: localUserLocation};
+        const localHomePostProps: HomePostHolderProps = {postList: localPostPropsList, eventProps: localEventProps, userLocation: {latitude:0, longitude:0}};
 
         return localHomePostProps;
     }));
@@ -191,4 +185,30 @@ export async function ConvertUserListToProps(props: LocalUserUserListProps) {
     }));
 
     return requests;
+}
+
+type ChatScreenProps = {
+    localUserID: number;
+    otherUserID: number;
+    messageDataArray: Array<JSON>;
+}
+
+export async function ConvertMessageListToProps(props: ChatScreenProps) {
+    const localUserData = await ReturnUserDetails({userID: props.localUserID});
+    const otherUserData = await ReturnUserDetails({userID: props.otherUserID});
+
+    const localUserProps = ConvertProfileDetailsToProps(localUserData);
+    const otherUserProps = ConvertProfileDetailsToProps(otherUserData);
+
+    var messagePropList: MessageProps[] = [];
+
+    props.messageDataArray.map(localMessage => {
+        if (localMessage.message_sender_id == props.localUserID) {
+            messagePropList.push({authorName: localUserProps.username, authorPictureURL: localUserProps.profilePictureURL, messageText: localMessage.message_contents});
+        } else {
+            messagePropList.push({authorName: otherUserProps.username, authorPictureURL: otherUserProps.profilePictureURL, messageText: localMessage.message_contents});
+        }
+    });
+
+    return messagePropList;
 }

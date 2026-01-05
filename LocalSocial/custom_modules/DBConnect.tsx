@@ -843,3 +843,37 @@ export async function RetrieveImageURL(props: ImageUploadProps) {
         return data.publicUrl;
     }
 }
+
+type ChatMessageProps = {
+    senderID: number;
+    receiverID: number;
+    messageText: string;
+}
+
+export async function SendChatMessage(props: ChatMessageProps) {
+    console.log("Sending chat message from user", props.senderID, "to user", props.receiverID, "with message text", props.messageText);
+
+    const {error} = await supabase.from("user_messages").insert({message_sender_id: props.senderID, message_receiver_id: props.receiverID, message_contents: props.messageText});
+
+    if (error) {
+        console.error("Error sending message:", error);
+    } else {
+        return true;
+    }
+    
+    return false;
+}
+
+export async function RetrieveChatMessages(props: FollowUserProps) {
+    console.log("Retrieving chat messages between users", props.localUserID, "and", props.userToFollowID);
+
+    const {data, error} = await supabase.rpc("getchatmessages", {first_user_id: props.localUserID, second_user_id: props.userToFollowID});
+
+    if (error) {
+        console.error("Error retrieving messages:", error);
+    } else {
+        return data;
+    }
+
+    return [];
+}

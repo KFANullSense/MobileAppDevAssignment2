@@ -14,7 +14,6 @@ export default function FullPostScreen(props: GlobalUserIDProps) {
 
     const params = useRoute().params;
     const localPostID = params.postID;
-    const localUserLocation = params.userLocation;
 
     const [postDetails, setPostDetails] = useState<PostProps>({postBody: "Loading...", postID: -1, postMediaURL: "", postTitle: "Loading...", authorID: -1, authorName:"Loading...", authorPictureURL: defaultProfilePictureURL, userLocation: {longitude:0, latitude:0}, location: ""});
     const [commentList, setCommentList] = useState<CommentProps[]>([]);
@@ -42,7 +41,7 @@ export default function FullPostScreen(props: GlobalUserIDProps) {
 
                 setPostDetails(propData);
 
-                setWithinRange(CheckDistance({startLocation: localUserLocation, endLocation: ConvertSQLCoordsToNumber(propData.location)}));
+                setWithinRange(CheckDistance({startLocation: propData.userLocation, endLocation: ConvertSQLCoordsToNumber(propData.location)}));
             }
         }
 
@@ -55,9 +54,9 @@ export default function FullPostScreen(props: GlobalUserIDProps) {
     }, []));
     
     return (
-        <View style={styles.container}>
-            <Text style={styles.header}>{postDetails?.postTitle}</Text>
-            <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+            <View style={styles.container}>
+                <Text style={styles.header}>{postDetails?.postTitle}</Text>
                 <View style={styles.scrollViewHolder}>
                     <ScrollView contentContainerStyle={styles.scrollContainer}>
                         <View style={styles.authorLikesContainer}>
@@ -82,8 +81,8 @@ export default function FullPostScreen(props: GlobalUserIDProps) {
                     </ScrollView>
                     <CommentInputContainer PostID={localPostID} UserID={props.userID} FetchCommentFunc={FetchComments} WithinRange={withinRange}/>
                 </View>
-            </TouchableWithoutFeedback>
-        </View>
+            </View>
+        </TouchableWithoutFeedback>
     )
 }
 

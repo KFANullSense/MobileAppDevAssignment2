@@ -94,7 +94,7 @@ export function PostObject(props: PostProps) {
     const navigation = useNavigation();
 
     return (
-        <Pressable onPress={() => navigation.navigate("Post Details", {postID: props.postID, userLocation: props.userLocation})}>
+        <Pressable onPress={() => navigation.navigate("Post Details", {postID: props.postID})}>
             <View style={postStyles.container}>
                 <View style={postStyles.titleContents}>
                     <Image source={{uri:props.authorPictureURL}} style={postStyles.authorImage} resizeMode="cover"/>
@@ -277,6 +277,43 @@ export function CommentObject(props: CommentProps) {
                 <View style={commentStyles.textColumn}>
                     <Text>{props.authorName}</Text>
                     <Text style={commentStyles.commentText}>{props.commentText}</Text>
+                </View>
+            </View>
+        </View>
+    )
+}
+
+type MessageHolderProps = {
+    messageList: MessageProps[];
+}
+
+export function MessageHolder(props: MessageHolderProps) {
+    return (
+        <View>
+            {props.messageList.map((localMessage, i) => <MessageObject
+                authorName={localMessage.authorName}
+                authorPictureURL={localMessage.authorPictureURL}
+                messageText={localMessage.messageText}
+                key={i}
+            />)}
+        </View>
+    )
+}
+
+export type MessageProps = {
+    authorName: string;
+    authorPictureURL: string;
+    messageText: string;
+}
+
+export function MessageObject(props: MessageProps) {
+    return (
+        <View style={commentStyles.container}>
+            <View style={commentStyles.contentRow}>
+                <Image source={{uri:props.authorPictureURL}} style={commentStyles.authorImage} resizeMode="cover"/>
+                <View style={commentStyles.textColumn}>
+                    <Text>{props.authorName}</Text>
+                    <Text style={commentStyles.commentText}>{props.messageText}</Text>
                 </View>
             </View>
         </View>
