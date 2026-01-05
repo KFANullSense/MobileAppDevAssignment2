@@ -13,6 +13,7 @@ import CreatePostScreen from "../MyEvents/CreatePostScreen";
 import EventPostsScreen from "../MyEvents/EventPostsScreen";
 import FullEventScreen from "../MyEvents/FullEventScreen";
 import FullPostScreen from "../MyEvents/FullPostScreen";
+import { FullProfileScreen } from "../Profile/FullProfileScreen";
 
 export function BrowseScreen(props: GlobalUserIDProps) {
     const [localCoords, setLocalCoords] = useState<LocationHolder>({latitude:0, longitude:0});
@@ -100,6 +101,7 @@ function RootStack(props:GlobalUserIDProps) {
             <Stack.Screen name="Event Posts" children={() => <EventPostsScreen userID={props.userID}/>}/>
             <Stack.Screen name="Create Post" children={() => <CreatePostScreen userID={props.userID}/>}/>
             <Stack.Screen name="Post Details" children={() => <FullPostScreen userID={props.userID}/>}/>
+            <Stack.Screen name="User Details" children={() => <FullProfileScreen userID={props.userID} userProfileID={null}/>}/>
         </Stack.Navigator>
     )
 }

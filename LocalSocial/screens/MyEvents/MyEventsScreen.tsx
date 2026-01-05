@@ -2,12 +2,13 @@ import { GlobalUserIDProps } from "@/app";
 import { BackgroundColour, ButtonColour } from "@/custom_modules/Colours";
 import { GetJoinedEvents } from "@/custom_modules/DBConnect";
 import { ConvertEventListToProps } from "@/custom_modules/HelperFunctions";
-import { EventHolder, EventProps } from "@/custom_modules/PostComponents";
+import { BorderLine, EventHolder, EventProps } from "@/custom_modules/PostComponents";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useCallback, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { FullProfileScreen } from "../Profile/FullProfileScreen";
 import CreateEventScreen from "./CreateEventScreen";
 import CreatePostScreen from "./CreatePostScreen";
 import EventPostsScreen from "./EventPostsScreen";
@@ -33,6 +34,7 @@ function RootStack(props:GlobalUserIDProps) {
             <Stack.Screen name="Event Posts" children={() => <EventPostsScreen userID={props.userID}/>}/>
             <Stack.Screen name="Create Post" children={() => <CreatePostScreen userID={props.userID}/>}/>
             <Stack.Screen name="Post Details" children={() => <FullPostScreen userID={props.userID}/>}/>
+            <Stack.Screen name="User Details" children={() => <FullProfileScreen userID={props.userID} userProfileID={null}/>}/>
         </Stack.Navigator>
     )
 }
@@ -59,6 +61,7 @@ function MyEventsScreen(props: GlobalUserIDProps) {
     return (
         <View style={styles.container}>
             <Header/>
+            <BorderLine/>
             <ScrollView style={styles.eventHolderContainer}>
                 <EventHolder eventList={componentList}/>
             </ScrollView>
@@ -101,7 +104,7 @@ const styles = StyleSheet.create({
 
     eventHolderContainer: {
         width: '90%',
-        marginTop:50
+        marginTop:25
     },
 
     header: {

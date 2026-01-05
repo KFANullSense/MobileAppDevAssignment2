@@ -2,7 +2,7 @@ import { GlobalUserIDProps } from "@/app";
 import { BackgroundColour, ButtonColour } from "@/custom_modules/Colours";
 import { GetPostsFromEvent, ReturnFullEvent } from "@/custom_modules/DBConnect";
 import { CheckDistance, ConvertEventDetailsToProp, ConvertPostListToProps, ConvertSQLCoordsToNumber, GetCurrentLocationCoords, LocationHolder } from "@/custom_modules/HelperFunctions";
-import { PostHolder, PostProps } from "@/custom_modules/PostComponents";
+import { BorderLine, PostHolder, PostProps } from "@/custom_modules/PostComponents";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
@@ -62,6 +62,7 @@ export default function EventPostsScreen(props: GlobalUserIDProps) {
     return (
         <View style={styles.container}>
             <Header eventName={localEventName}/>
+            <BorderLine/>
             <ScrollView style={styles.postContainer}>
                 <PostHolder postList={componentList} userLocation={localUserLocation}/>
             </ScrollView>
@@ -130,6 +131,7 @@ const styles = StyleSheet.create({
 
     postContainer: {
         width: '90%',
+        marginTop:15
     },
 
     header: {

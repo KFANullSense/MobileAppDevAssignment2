@@ -80,7 +80,7 @@ export async function ConvertPostListToProps(inputData: Array<JSON>) {
 
     const requests = await Promise.all(inputData.map(async (localPost) => {
         const localPostAuthor = await ReturnUserDetails({userID: localPost.user_id});
-        const localPostProps: PostProps = {postTitle: localPost.post_title, postBody: localPost.post_body, postMediaURL: localPost.post_image_url, authorName: localPostAuthor[0].username, authorPictureURL: localPostAuthor[0].profile_picture_url, postID: localPost.post_id, location: localPost.post_location, userLocation: localUserLocation};
+        const localPostProps: PostProps = {postTitle: localPost.post_title, postBody: localPost.post_body, postMediaURL: localPost.post_image_url, authorName: localPostAuthor[0].username, authorPictureURL: localPostAuthor[0].profile_picture_url, postID: localPost.post_id, location: localPost.post_location, userLocation: localUserLocation, authorID: localPost.user_id};
         return(localPostProps);
     }));
 
@@ -94,7 +94,7 @@ export async function ConvertPostDetailsToProps(inputData: Array<JSON>) {
 
     const localPostAuthor = await ReturnUserDetails({userID: profileJSON.user_id});
 
-    const returnProp: PostProps = {postTitle: profileJSON.post_title, postBody: profileJSON.post_body, postMediaURL: profileJSON.post_image_url, authorName: localPostAuthor[0].username, authorPictureURL: localPostAuthor[0].profile_picture_url, postID: profileJSON.post_id, location: profileJSON.post_location, userLocation: localUserLocation};
+    const returnProp: PostProps = {postTitle: profileJSON.post_title, postBody: profileJSON.post_body, postMediaURL: profileJSON.post_image_url, authorName: localPostAuthor[0].username, authorPictureURL: localPostAuthor[0].profile_picture_url, postID: profileJSON.post_id, location: profileJSON.post_location, userLocation: localUserLocation, authorID: profileJSON.user_id};
 
     return returnProp;
 }

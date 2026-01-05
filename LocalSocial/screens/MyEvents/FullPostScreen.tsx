@@ -4,12 +4,14 @@ import { CreateComment, HasUserLikedPost, LikePost, ReturnFullPost, ReturnPostCo
 import { CheckDistance, ConvertCommentListToProps, ConvertPostDetailsToProps, ConvertSQLCoordsToNumber } from "@/custom_modules/HelperFunctions";
 import { CommentHolder, CommentProps, PostProps } from "@/custom_modules/PostComponents";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useFocusEffect, useRoute } from "@react-navigation/native";
+import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import { useCallback, useRef, useState } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 
 export default function FullPostScreen(props: GlobalUserIDProps) {
+    const navigation = useNavigation();
+
     const params = useRoute().params;
     const localPostID = params.postID;
     const localUserLocation = params.userLocation;
@@ -58,10 +60,12 @@ export default function FullPostScreen(props: GlobalUserIDProps) {
             <View style={styles.scrollViewHolder}>
                 <ScrollView contentContainerStyle={styles.scrollContainer}>
                     <View style={styles.authorLikesContainer}>
-                        <View style={styles.authorContainer}>
-                            <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={styles.authorImage} resizeMode="cover"/>
-                            <Text style={styles.authorText}>{postDetails?.authorName}</Text>
-                        </View>
+                        <Pressable onPress={() => navigation.navigate("User Details", {userID: postDetails?.authorID})}>
+                            <View style={styles.authorContainer}>
+                                <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={styles.authorImage} resizeMode="cover"/>
+                                <Text style={styles.authorText}>{postDetails?.authorName}</Text>
+                            </View>
+                        </Pressable>
                         <LikeButton postID={localPostID} userID={props.userID}/>
                     </View>
                     <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={styles.postImage} resizeMode="cover"/>

@@ -2,7 +2,7 @@ import { GlobalUserIDProps } from "@/app";
 import { BackgroundColour, ButtonColour, HolderColour } from "@/custom_modules/Colours";
 import { DeleteEvent, HasUserJoinedEvent, IsUserHostOfEvent, JoinEvent, LeaveEvent, ReturnFullEvent } from "@/custom_modules/DBConnect";
 import { CheckDistance, ConvertEventDetailsToProp, ConvertSQLCoordsToNumber, GetCurrentLocationCoords } from "@/custom_modules/HelperFunctions";
-import { EventProps } from "@/custom_modules/PostComponents";
+import { BorderLine, EventProps } from "@/custom_modules/PostComponents";
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -45,6 +45,7 @@ export default function FullEventScreen(props: GlobalUserIDProps) {
         
         <View style={styles.container}>
             <Text style={styles.header}>{eventDetails?.eventName}</Text>
+            <BorderLine/>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={styles.eventImage} resizeMode="cover"/>
                 <View style={styles.eventDatesHolder}>
@@ -167,7 +168,7 @@ const styles = StyleSheet.create({
     },
 
     eventImage: {
-        borderRadius:5,
+        borderRadius:15,
         maxHeight:250,
         width:'95%',
         height:'100%',

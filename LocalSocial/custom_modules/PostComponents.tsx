@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { BackgroundColour, HolderColour } from "./Colours";
+import { BackgroundColour, HolderColour, HolderColourDark } from "./Colours";
 import { LocationHolder } from "./HelperFunctions";
 
 type HomePostRootProps = {
@@ -85,6 +85,7 @@ export type PostProps = {
     location: string;
     postID: number;
     userLocation: LocationHolder;
+    authorID: number;
 }
 
 export function PostObject(props: PostProps) {
@@ -203,14 +204,31 @@ export function CommentObject(props: CommentProps) {
     )
 }
 
+export function BorderLine() {
+    return (
+        <View style={borderLineStyles.border}/>
+    )
+}
+
+const borderLineStyles = StyleSheet.create({
+    border: {
+        borderBottomWidth:2,
+        borderBottomColor:'black',
+        width:'90%',
+        alignSelf:'center',
+        marginBottom:5,
+        marginTop:5
+    }
+})
+
 const postHolderStyles = StyleSheet.create({
     holder: {
-        backgroundColor: BackgroundColour,
+        backgroundColor: HolderColourDark,
         borderRadius: 10,
         margin:10
     },
     title: {
-        backgroundColor: '#fff',
+        backgroundColor: HolderColour,
         marginLeft: 10,
         marginRight:'auto',
         marginTop:10,
