@@ -216,7 +216,7 @@ function UserStatusDisplay(props:ProfileEditModalProps) {
                                     <Text>Cancel</Text>
                                 </Pressable>
                             </View>
-                            </View>
+                        </View>
                     </Modal>
                     <Text>User status:</Text>
                     <Pressable style={editButtonStyles.editButton} onPress={() => OpenModal()}>

@@ -1,7 +1,8 @@
 import { GlobalUserIDProps } from "@/app";
 import { BackgroundColour, ButtonColour } from "@/custom_modules/CustomStyles";
-import { CreatePost } from "@/custom_modules/DBConnect";
+import { CreatePost, UploadImage } from "@/custom_modules/DBConnect";
 import { GetCurrentLocationForSQL } from "@/custom_modules/HelperFunctions";
+import { ImagePicker, ImagePlaceholder } from "@/custom_modules/ImagePickerModal";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import React, { useState } from "react";
@@ -13,9 +14,11 @@ export default function CreatePostScreen(props: GlobalUserIDProps) {
     const params = useRoute().params;
     const localEventID = params.eventID;
 
-    const [title, setTitle] = useState('');
-    const [body, setBody] = React.useState('');
+    const [title, setTitle] = useState("");
+    const [body, setBody] = React.useState("");
+    const [localImage, setLocalImage] = useState("");
 
+    const [modalVisible, setModalVisible] = useState(false);
 
     async function ValidateInput() {
         if (title.length == 0 || body.length == 0) {
@@ -27,11 +30,26 @@ export default function CreatePostScreen(props: GlobalUserIDProps) {
                 console.error("Error while fetching location");
             } else {
                 const currLocation = await GetCurrentLocationForSQL();
+                var currImage = "";
+                var imageSuccess = true;
+                
+                if (localImage != "") {
+                    imageSuccess = false;
 
-                const result = await CreatePost({postTitle: title, postBody: body, postImageUrl: "", eventID: localEventID, authorID: props.userID, location: currLocation})
+                    const imagePath = await UploadImage({userID: props.userID, imageURI: localImage});
 
-                if (result == true) {
-                    navigation.goBack();
+                    if (imagePath) {
+                        currImage = imagePath;
+                        imageSuccess = true;
+                    }
+                }
+
+                if (imageSuccess == true) {
+                    const result = await CreatePost({postTitle: title, postBody: body, postImageUrl: currImage, eventID: localEventID, authorID: props.userID, location: currLocation})
+
+                    if (result == true) {
+                        navigation.goBack();
+                    }
                 }
             }
         }
@@ -39,8 +57,11 @@ export default function CreatePostScreen(props: GlobalUserIDProps) {
 
     return (
         <View style={styles.container}>
+            <ImagePicker modalVisible={modalVisible} setModalVisible={setModalVisible} updateImageFunc={setLocalImage}/>
+
             <View style = {styles.eventCreateHolder}>
                 <TextInput style={styles.titleInput} placeholder="Post Title" onChangeText={(value) => setTitle(value)}/>
+                    <ImagePlaceholder localImageURI={localImage} setModalVisibleFunc={setModalVisible}/>
                 <TextInput style={styles.descriptionInput} multiline placeholder="Post Contents" onChangeText={(value) => setBody(value)}/>
             </View>
             <View style={styles.floatingContainer}> 

@@ -106,9 +106,7 @@ export function PostObject(props: PostProps) {
                     </View>
                 </View>
                 <View style={postStyles.contents}>
-                    <View style={postStyles.contentImageContainer}>
-                        <Image source={{uri:"https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}} style={postStyles.contentsImage} resizeMode="cover"/>
-                    </View>
+                    <PostContentImage imageURL={props.postMediaURL}/>
                     <View style={postStyles.contentTextContainer}>
                         <Text style={postStyles.contentsText}>{props.postBody}</Text>
                     </View>
@@ -116,6 +114,26 @@ export function PostObject(props: PostProps) {
             </View>
         </Pressable>
     )
+}
+
+export type ImageURLType = {
+    imageURL: string;
+}
+
+function PostContentImage(props: ImageURLType) {
+    if (props.imageURL == "") {
+        return (
+            <View>
+
+            </View>
+        )
+    } else {
+        return (
+            <View style={postStyles.contentImageContainer}>
+                <Image source={{uri:props.imageURL}} style={postStyles.contentsImage} resizeMode="cover"/>
+            </View>
+        )
+    }
 }
 
 export type EventHolderProps = {

@@ -801,3 +801,42 @@ export async function CheckIfUsernameAvailable(nameToCheck: string) {
 
     return false;
 }
+
+type ImageUploadProps = {
+    userID: number;
+    imageURI: string;
+}
+
+//Uploads a local image to storage and returns public URL
+export async function UploadImage(props: ImageUploadProps) {
+    console.log("Attempting to upload image for user", props.userID, "with local path", props.imageURI)
+
+    const imageResponse = await fetch(props.imageURI);
+    const imageBlob = await imageResponse.blob();
+    const imageArrayBuffer = await new Response(imageBlob).arrayBuffer();
+    const fileName = "public/" + props.userID + "/" + Date.now() + ".jpg";
+
+    const {data, error} = await supabase.storage.from("files").upload(fileName, imageArrayBuffer, {contentType: 'image/jpeg', upsert: false});
+
+    if (error) {
+        console.error("Error uploading image:", error);
+    } else {
+        const uploadedImageURL = await RetrieveImageURL({userID: props.userID, imageURI: data.path});
+
+        return uploadedImageURL;
+    }
+
+    return "";
+}
+
+//Retrieves public URL for image in storage bucket
+export async function RetrieveImageURL(props: ImageUploadProps) {
+    console.log("Retrieving full image URL for uploaded image with path", props.imageURI);
+
+    const {data} = supabase.storage.from("files").getPublicUrl(props.imageURI);
+
+    if (data) {
+        console.log("Image URL retrieved at", data.publicUrl);
+        return data.publicUrl;
+    }
+}
