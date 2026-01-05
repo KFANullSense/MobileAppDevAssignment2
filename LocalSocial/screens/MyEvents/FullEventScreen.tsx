@@ -6,7 +6,7 @@ import { BorderLine, EventProps, ImageURLType } from "@/custom_modules/PostCompo
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import { useCallback, useRef, useState } from "react";
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Image, Keyboard, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 
 
 export default function FullEventScreen(props: GlobalUserIDProps) {
@@ -175,17 +175,19 @@ function EventDescriptionDisplay(props: EventEditModalProps) {
                 visible={modalVisible}
                 transparent={true}
                 onRequestClose={() => setModalVisible(false)}>
-                    <View style={editButtonStyles.modalContainer}>
-                        <View style={editButtonStyles.modalView}>
-                            <TextInput style={editButtonStyles.modalTextInput} ref={eventDescriptionInputRef} placeholder="Enter new event description..." onChangeText={(value) => setEventDescriptionString(value)}/>
-                            <Pressable style={editButtonStyles.modalButton} onPress={async () => {ModalUpdateEventDescription()}}>
-                                <Text>Update Event Description</Text>
-                            </Pressable>
-                            <Pressable style={editButtonStyles.modalButton} onPress={() => {setModalVisible(false)}}>
-                                <Text>Cancel</Text>
-                            </Pressable>
+                    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+                        <View style={editButtonStyles.modalContainer}>
+                            <View style={editButtonStyles.modalView}>
+                                <TextInput style={editButtonStyles.modalTextInput} ref={eventDescriptionInputRef} placeholder="Enter new event description..." onChangeText={(value) => setEventDescriptionString(value)}/>
+                                <Pressable style={editButtonStyles.modalButton} onPress={async () => {ModalUpdateEventDescription()}}>
+                                    <Text>Update Event Description</Text>
+                                </Pressable>
+                                <Pressable style={editButtonStyles.modalButton} onPress={() => {setModalVisible(false)}}>
+                                    <Text>Cancel</Text>
+                                </Pressable>
+                            </View>
                         </View>
-                        </View>
+                    </TouchableWithoutFeedback>
                 </Modal>
 
                 <Text style={styles.eventInfoText}>{props.eventData.eventDescription}</Text>

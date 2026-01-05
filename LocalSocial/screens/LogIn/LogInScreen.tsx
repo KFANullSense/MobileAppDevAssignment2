@@ -1,7 +1,7 @@
 import { BackgroundColour, ButtonColour } from '@/custom_modules/CustomStyles';
 import { CreateUser, LogInToUser } from '@/custom_modules/DBConnect';
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Keyboard, Pressable, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 
 function Header() {
     return (
@@ -22,16 +22,18 @@ export default function LogInScreen(props: LogInScreenProps) {
     return (
         <View style={styles.container}>
             <Header/>
-            <View style={styles.loginContainer}>
-                <TextInput style={styles.loginTextbox} placeholder="Username" onChangeText={(value) => setUsername(value)} autoCapitalize='none'/>
-                <TextInput style={styles.loginTextbox} placeholder="Password" onChangeText={(value) => setPassword(value)} secureTextEntry={true} autoCapitalize='none'/>
-                <Pressable style={styles.loginButton} onPress={async () => {props.updateIDFunc(await LogInToUser({username: username, password: password}))}}>
-                    <Text style={styles.loginButtonText}>Log In</Text>
-                </Pressable>
-                <Pressable style={styles.loginButton} onPress={async() => {props.updateIDFunc(await CreateUser({username: username, password:password}))}}>
-                    <Text style={styles.loginButtonText}>Register</Text>
-                </Pressable>
-            </View>
+            <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+                <View style={styles.loginContainer}>
+                    <TextInput style={styles.loginTextbox} placeholder="Username" onChangeText={(value) => setUsername(value)} autoCapitalize='none'/>
+                    <TextInput style={styles.loginTextbox} placeholder="Password" onChangeText={(value) => setPassword(value)} secureTextEntry={true} autoCapitalize='none'/>
+                    <Pressable style={styles.loginButton} onPress={async () => {props.updateIDFunc(await LogInToUser({username: username, password: password}))}}>
+                        <Text style={styles.loginButtonText}>Log In</Text>
+                    </Pressable>
+                    <Pressable style={styles.loginButton} onPress={async() => {props.updateIDFunc(await CreateUser({username: username, password:password}))}}>
+                        <Text style={styles.loginButtonText}>Register</Text>
+                    </Pressable>
+                </View>
+            </TouchableWithoutFeedback>
         </View>
     )
 }

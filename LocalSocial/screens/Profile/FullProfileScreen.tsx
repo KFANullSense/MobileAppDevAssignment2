@@ -2,12 +2,12 @@ import { GlobalUserIDProps } from "@/app";
 import { BackgroundColour, ButtonColour, editButtonStyles, HolderColour } from "@/custom_modules/CustomStyles";
 import { CheckIfUserFollowing, defaultProfilePictureURL, FollowUser, GetFollowerCount, GetFollowingCount, GetPostCount, GetUserLikeCount, ReturnUserDetails, UnfollowUser, UpdateUsername, UpdateUserProfilePicture, UpdateUserStatus, UploadImage } from "@/custom_modules/DBConnect";
 import { ConvertProfileDetailsToProps, RetrieveRecentPostsByUser } from "@/custom_modules/HelperFunctions";
-import { ImagePicker } from "@/custom_modules/ImagePickerModal";
+import { ImagePicker, LoadingModal } from "@/custom_modules/ImagePickerModal";
 import { BorderLine, HomePostHolderProps, HomePostRoot } from "@/custom_modules/PostComponents";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useFocusEffect, useRoute } from "@react-navigation/native";
 import { useCallback, useRef, useState } from "react";
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Image, Keyboard, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export type ProfileProps = {
@@ -150,17 +150,19 @@ function UsernameHeader(props:ProfileEditFollowModalProps) {
                 visible={modalVisible}
                 transparent={true}
                 onRequestClose={() => setModalVisible(false)}>
-                    <View style={editButtonStyles.modalContainer}>
-                        <View style={editButtonStyles.modalView}>
-                            <TextInput style={editButtonStyles.modalTextInput} ref={usernameInputRef} placeholder="Enter new username..." onChangeText={(value) => setUsernameString(value)} value={usernameString}/>
-                            <Pressable style={editButtonStyles.modalButton} onPress={async () => {ModalUpdateUsername()}}>
-                                <Text>Update Username</Text>
-                            </Pressable>
-                            <Pressable style={editButtonStyles.modalButton} onPress={() => {setModalVisible(false)}}>
-                                <Text>Cancel</Text>
-                            </Pressable>
+                    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+                        <View style={editButtonStyles.modalContainer}>
+                            <View style={editButtonStyles.modalView}>
+                                <TextInput style={editButtonStyles.modalTextInput} ref={usernameInputRef} placeholder="Enter new username..." onChangeText={(value) => setUsernameString(value)} value={usernameString}/>
+                                <Pressable style={editButtonStyles.modalButton} onPress={async () => {ModalUpdateUsername()}}>
+                                    <Text>Update Username</Text>
+                                </Pressable>
+                                <Pressable style={editButtonStyles.modalButton} onPress={() => {setModalVisible(false)}}>
+                                    <Text>Cancel</Text>
+                                </Pressable>
+                            </View>
                         </View>
-                        </View>
+                        </TouchableWithoutFeedback>
                 </Modal>
 
                 <Text style={styles.header}>{props.profileData.username}</Text>
@@ -181,6 +183,7 @@ function UsernameHeader(props:ProfileEditFollowModalProps) {
 
 function ProfilePictureDisplay(props:ProfileEditModalProps) {
     const [imageModalVisible, setImageModalVisible] = useState(false);
+    const [loadingModalVisible, setLoadingModalVisible] = useState(false);
 
     async function ModalUpdateProfilePicture(newImageURL: string) {
         if (newImageURL == "") {
@@ -188,7 +191,9 @@ function ProfilePictureDisplay(props:ProfileEditModalProps) {
             return;
         }
         
+        setLoadingModalVisible(true);
         const imagePath = await UploadImage({userID: props.userID, imageURI: newImageURL});
+        setLoadingModalVisible(false);
 
         if (imagePath) {
             const result = await UpdateUserProfilePicture({userID: props.userID, newString: newImageURL});
@@ -203,6 +208,7 @@ function ProfilePictureDisplay(props:ProfileEditModalProps) {
         return (
             <View>
                 <View style={editButtonStyles.editRowStretch}>
+                    <LoadingModal modalVisible={loadingModalVisible}/>
                     <ImagePicker modalVisible={imageModalVisible} setModalVisible={setImageModalVisible} updateImageFunc={ModalUpdateProfilePicture}/>
 
                     <Image source={{uri:props.profileData.profilePictureURL}} style={styles.profilePicture} resizeMode="cover"/>
@@ -250,17 +256,19 @@ function UserStatusDisplay(props:ProfileEditModalProps) {
                     visible={modalVisible}
                     transparent={true}
                     onRequestClose={() => setModalVisible(false)}>
-                        <View style={editButtonStyles.modalContainer}>
-                            <View style={editButtonStyles.modalView}>
-                                <TextInput style={editButtonStyles.modalTextInput} ref={userStatusInputRef} placeholder="Enter new status..." onChangeText={(value) => setUserStatusString(value)} value={userStatusString}/>
-                                <Pressable style={editButtonStyles.modalButton} onPress={async () => {ModalUpdateUsername()}}>
-                                    <Text>Update User Status</Text>
-                                </Pressable>
-                                <Pressable style={editButtonStyles.modalButton} onPress={() => {setModalVisible(false)}}>
-                                    <Text>Cancel</Text>
-                                </Pressable>
+                        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+                            <View style={editButtonStyles.modalContainer}>
+                                <View style={editButtonStyles.modalView}>
+                                    <TextInput style={editButtonStyles.modalTextInput} ref={userStatusInputRef} placeholder="Enter new status..." onChangeText={(value) => setUserStatusString(value)} value={userStatusString}/>
+                                    <Pressable style={editButtonStyles.modalButton} onPress={async () => {ModalUpdateUsername()}}>
+                                        <Text>Update User Status</Text>
+                                    </Pressable>
+                                    <Pressable style={editButtonStyles.modalButton} onPress={() => {setModalVisible(false)}}>
+                                        <Text>Cancel</Text>
+                                    </Pressable>
+                                </View>
                             </View>
-                        </View>
+                        </TouchableWithoutFeedback>
                     </Modal>
                     <Text>User status:</Text>
                     <Pressable style={editButtonStyles.editButton} onPress={() => OpenModal()}>

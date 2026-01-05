@@ -83,6 +83,24 @@ export function ImagePlaceholder(props: ImagePlaceholdeProps) {
     }
 }
 
+type LoadingModalProps = {
+    modalVisible: boolean;
+}
+
+export function LoadingModal(props: LoadingModalProps) {
+    return (
+        <Modal
+        visible={props.modalVisible}
+        transparent={true}>
+            <View style={editButtonStyles.modalContainer}>
+                <View style={editButtonStyles.modalView}>
+                    <Text style={{fontSize:30, padding:40}}>Uploading...</Text>
+                </View>
+            </View>
+        </Modal>
+    )
+}
+
 const styles = StyleSheet.create({
     holderImage: {
         borderRadius:15,

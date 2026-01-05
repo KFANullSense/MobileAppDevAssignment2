@@ -6,7 +6,7 @@ import { ImagePicker, ImagePlaceholder } from "@/custom_modules/ImagePickerModal
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Keyboard, Pressable, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 export default function CreateEventScreen(props: GlobalUserIDProps) {
@@ -77,23 +77,25 @@ export default function CreateEventScreen(props: GlobalUserIDProps) {
 
     return (
         <View style={styles.container}>
-            <View style = {styles.eventCreateHolder}>
-                <ImagePicker modalVisible={imageModalVisible} setModalVisible={setImageModalVisible} updateImageFunc={setLocalImage}/>
+            <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+                <View style = {styles.eventCreateHolder}>
+                    <ImagePicker modalVisible={imageModalVisible} setModalVisible={setImageModalVisible} updateImageFunc={setLocalImage}/>
 
-                <TextInput style={styles.titleInput} placeholder="Event Title" onChangeText={(value) => setTitle(value)}/>
-                <ImagePlaceholder localImageURI={localImage} setModalVisibleFunc={setImageModalVisible}/>
-                <TextInput style={styles.descriptionInput} multiline placeholder="Event Description" onChangeText={(value) => setDescription(value)}/>
+                    <TextInput style={styles.titleInput} placeholder="Event Title" onChangeText={(value) => setTitle(value)}/>
+                    <ImagePlaceholder localImageURI={localImage} setModalVisibleFunc={setImageModalVisible}/>
+                    <TextInput style={styles.descriptionInput} multiline placeholder="Event Description" onChangeText={(value) => setDescription(value)}/>
 
-                <Pressable onPress={showStartDatePicker} style={styles.dateTimeButton}>
-                    <Text>Start Time: {ConvertDateTimeForSQL(startTime)}</Text>
-                </Pressable>
-                <DateTimePickerModal isVisible={isStartDatePickerVisible} mode="datetime" onConfirm={confirmStartDatePicker} onCancel={hideStartDatePicker}/>
+                    <Pressable onPress={showStartDatePicker} style={styles.dateTimeButton}>
+                        <Text>Start Time: {ConvertDateTimeForSQL(startTime)}</Text>
+                    </Pressable>
+                    <DateTimePickerModal isVisible={isStartDatePickerVisible} mode="datetime" onConfirm={confirmStartDatePicker} onCancel={hideStartDatePicker}/>
 
-                <Pressable onPress={showEndDatePicker} style={styles.dateTimeButton}>
-                    <Text>End Time: {ConvertDateTimeForSQL(endTime)}</Text>
-                </Pressable>
-                <DateTimePickerModal isVisible={isEndDatePickerVisible} mode="datetime" onConfirm={confirmEndDatePicker} onCancel={hideEndDatePicker}/>
-            </View>
+                    <Pressable onPress={showEndDatePicker} style={styles.dateTimeButton}>
+                        <Text>End Time: {ConvertDateTimeForSQL(endTime)}</Text>
+                    </Pressable>
+                    <DateTimePickerModal isVisible={isEndDatePickerVisible} mode="datetime" onConfirm={confirmEndDatePicker} onCancel={hideEndDatePicker}/>
+                </View>
+            </TouchableWithoutFeedback>
             <View style={styles.floatingContainer}> 
                 <Pressable style={styles.createButton} onPress={async() => ValidateInput()}>
                     <FontAwesome style={{marginRight:5}}name="send-o" size={35}/>

@@ -6,7 +6,7 @@ import { ImagePicker, ImagePlaceholder } from "@/custom_modules/ImagePickerModal
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import React, { useState } from "react";
-import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Keyboard, Pressable, StyleSheet, TextInput, TouchableWithoutFeedback, View } from "react-native";
 
 export default function CreatePostScreen(props: GlobalUserIDProps) {
     const navigation = useNavigation();
@@ -56,20 +56,22 @@ export default function CreatePostScreen(props: GlobalUserIDProps) {
     }
 
     return (
-        <View style={styles.container}>
-            <ImagePicker modalVisible={imageModalVisible} setModalVisible={setImageModalVisible} updateImageFunc={setLocalImage}/>
+        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+            <View style={styles.container}>
+                <ImagePicker modalVisible={imageModalVisible} setModalVisible={setImageModalVisible} updateImageFunc={setLocalImage}/>
 
-            <View style = {styles.eventCreateHolder}>
-                <TextInput style={styles.titleInput} placeholder="Post Title" onChangeText={(value) => setTitle(value)}/>
-                <ImagePlaceholder localImageURI={localImage} setModalVisibleFunc={setImageModalVisible}/>
-                <TextInput style={styles.descriptionInput} multiline placeholder="Post Contents" onChangeText={(value) => setBody(value)}/>
+                <View style = {styles.eventCreateHolder}>
+                    <TextInput style={styles.titleInput} placeholder="Post Title" onChangeText={(value) => setTitle(value)}/>
+                    <ImagePlaceholder localImageURI={localImage} setModalVisibleFunc={setImageModalVisible}/>
+                    <TextInput style={styles.descriptionInput} multiline placeholder="Post Contents" onChangeText={(value) => setBody(value)}/>
+                </View>
+                <View style={styles.floatingContainer}> 
+                    <Pressable style={styles.createButton} onPress={async() => ValidateInput()}>
+                        <FontAwesome style={{marginRight:5}}name="send-o" size={35}/>
+                    </Pressable>
+                </View>
             </View>
-            <View style={styles.floatingContainer}> 
-                <Pressable style={styles.createButton} onPress={async() => ValidateInput()}>
-                    <FontAwesome style={{marginRight:5}}name="send-o" size={35}/>
-                </Pressable>
-            </View>
-        </View>
+        </TouchableWithoutFeedback>
     )
 }
 

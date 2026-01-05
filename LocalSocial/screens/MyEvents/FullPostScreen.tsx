@@ -6,7 +6,7 @@ import { CommentHolder, CommentProps, ImageURLType, PostProps } from "@/custom_m
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import { useCallback, useRef, useState } from "react";
-import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Image, Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 
 
 export default function FullPostScreen(props: GlobalUserIDProps) {
@@ -57,30 +57,32 @@ export default function FullPostScreen(props: GlobalUserIDProps) {
     return (
         <View style={styles.container}>
             <Text style={styles.header}>{postDetails?.postTitle}</Text>
-            <View style={styles.scrollViewHolder}>
-                <ScrollView contentContainerStyle={styles.scrollContainer}>
-                    <View style={styles.authorLikesContainer}>
-                        <Pressable onPress={() => navigation.navigate("User Details", {userID: postDetails?.authorID})}>
-                            <View style={styles.authorContainer}>
-                                <Image source={{uri:postDetails.authorPictureURL}} style={styles.authorImage} resizeMode="cover"/>
-                                <Text style={styles.authorText}>{postDetails?.authorName}</Text>
-                            </View>
-                        </Pressable>
-                        <LikeButton postID={localPostID} userID={props.userID}/>
-                    </View>
-                    <ContentImage imageURL={postDetails?.postMediaURL}/>
-                    <View style={styles.postBodyContainer}>
-                        <Text style={styles.postBodyText}>{postDetails?.postBody}</Text>
-                    </View>
-                </ScrollView>
-            </View>
-            <View style={styles.commentContainer}>
-                <Text>{commentList?.length} Comments</Text>
-                <ScrollView>
-                    <CommentHolder commentList={commentList}/>
-                </ScrollView>
-                <CommentInputContainer PostID={localPostID} UserID={props.userID} FetchCommentFunc={FetchComments} WithinRange={withinRange}/>
-            </View>
+            <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+                <View style={styles.scrollViewHolder}>
+                    <ScrollView contentContainerStyle={styles.scrollContainer}>
+                        <View style={styles.authorLikesContainer}>
+                            <Pressable onPress={() => navigation.navigate("User Details", {userID: postDetails?.authorID})}>
+                                <View style={styles.authorContainer}>
+                                    <Image source={{uri:postDetails.authorPictureURL}} style={styles.authorImage} resizeMode="cover"/>
+                                    <Text style={styles.authorText}>{postDetails?.authorName}</Text>
+                                </View>
+                            </Pressable>
+                            <LikeButton postID={localPostID} userID={props.userID}/>
+                        </View>
+                        <ContentImage imageURL={postDetails?.postMediaURL}/>
+                        <View style={styles.postBodyContainer}>
+                            <Text style={styles.postBodyText}>{postDetails?.postBody}</Text>
+                        </View>
+                    </ScrollView>
+                </View>
+                <View style={styles.commentContainer}>
+                    <Text>{commentList?.length} Comments</Text>
+                    <ScrollView>
+                        <CommentHolder commentList={commentList}/>
+                    </ScrollView>
+                    <CommentInputContainer PostID={localPostID} UserID={props.userID} FetchCommentFunc={FetchComments} WithinRange={withinRange}/>
+                </View>
+            </TouchableWithoutFeedback>
         </View>
     )
 }
