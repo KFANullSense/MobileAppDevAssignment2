@@ -7,6 +7,8 @@ type UserDetailsProps = {
 
 //Create a user, then immediately log into them
 export async function CreateUser(props: UserDetailsProps) {
+    const defaultProfilePictureURL = "https://kfsnhareeqqsrlnwylox.supabase.co/storage/v1/object/public/files/public/emptypfp.jpg";
+
     console.log("Attempting to create user with username " + props.username + " and password " + props.password);
 
     const usernameAvailable = await CheckIfUsernameAvailable(props.username);
@@ -14,7 +16,7 @@ export async function CreateUser(props: UserDetailsProps) {
     if (!usernameAvailable) {
         console.error("Username already in use");
     } else {
-        const {error} = await supabase.from("users").insert({ username: props.username, password: props.password, profile_picture_url: "" });
+        const {error} = await supabase.from("users").insert({ username: props.username, password: props.password, profile_picture_url: defaultProfilePictureURL});
 
         if (error) {
             console.error("Error creating user:", error);
