@@ -130,7 +130,7 @@ export async function RetrieveRecentPostsByUser(localUserID: number) {
         const localEventProps = ConvertEventDetailsToProp([localEvent]);
         const localPostData = await GetRecentPostsFromEventByUser({eventID: localEventProps.eventID, userID: localUserID});
         if (localPostData.length == 0) {
-            return [];
+            return null;
         }
 
         const localPostPropsList: PostProps[] = await ConvertPostListToProps(localPostData);
@@ -139,7 +139,11 @@ export async function RetrieveRecentPostsByUser(localUserID: number) {
         return localHomePostProps;
     }));
 
-    return requests;
+    const nullCheckArray = requests.filter(function (item) {
+        return item != null;
+    });
+
+    return nullCheckArray;
 }
 
 type CheckDistanceProps = {
