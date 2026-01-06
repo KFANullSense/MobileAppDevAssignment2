@@ -44,7 +44,7 @@ export function ImagePicker(props: ImagePickerProps) {
         onRequestClose={() => props.setModalVisible(false)}>
             <View style={editButtonStyles.modalContainer}>
                 <View style={editButtonStyles.modalView}>
-                    <Image source={{uri:localImageURI}} style={styles.holderImage} resizeMode="contain"/>
+                    <UploadPreviewImage imageURL={localImageURI}/>
                     <View style={styles.buttonContainer}>
                         <Pressable style={editButtonStyles.modalButton} onPress={async () => {PickImage();}}>
                             <Text style={styles.buttonText}>Select Image</Text>
@@ -60,6 +60,25 @@ export function ImagePicker(props: ImagePickerProps) {
             </View>
         </Modal>
     )
+}
+
+type UploadPreviewImageProps = {
+    imageURL: string;
+}
+
+function UploadPreviewImage(props: UploadPreviewImageProps) {
+    
+    if (props.imageURL == "") {
+        return (
+            <View>
+
+            </View>
+        )
+    } else {
+        return (
+            <Image source={{uri:props.imageURL}} style={styles.holderImage} resizeMode="contain"/>
+        )
+    }
 }
 
 type ImagePlaceholdeProps = {
