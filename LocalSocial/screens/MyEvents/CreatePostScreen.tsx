@@ -37,7 +37,9 @@ export default function CreatePostScreen(props: GlobalUserIDProps) {
                 if (localImage != "") {
                     imageSuccess = false;
 
+                    setLoadingModalVisible(true);
                     const imagePath = await UploadImage({userID: props.userID, imageURI: localImage});
+                    setLoadingModalVisible(false);
 
                     if (imagePath) {
                         currImage = imagePath;
