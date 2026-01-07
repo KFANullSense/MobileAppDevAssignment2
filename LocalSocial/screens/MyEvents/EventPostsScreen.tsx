@@ -1,5 +1,5 @@
 import { GlobalUserIDProps } from "@/app";
-import { BackgroundColour, ButtonColour } from "@/custom_modules/CustomStyles";
+import { BackgroundColour, ButtonColour, TooFarButtonColour } from "@/custom_modules/CustomStyles";
 import { GetPostsFromEvent, ReturnFullEvent } from "@/custom_modules/DBConnect";
 import { CheckDistance, ConvertEventDetailsToProp, ConvertPostListToProps, ConvertSQLCoordsToNumber, GetCurrentLocationCoords, LocationHolder } from "@/custom_modules/HelperFunctions";
 import { BorderLine, PostHolder, PostProps } from "@/custom_modules/PostComponents";
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     },
 
     tooFarButton: {
-        backgroundColor: '#687a80ff',
+        backgroundColor: TooFarButtonColour,
         width: 75,
         height: 75,
         borderRadius: 50,

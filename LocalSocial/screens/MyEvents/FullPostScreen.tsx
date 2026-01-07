@@ -1,5 +1,5 @@
 import { GlobalUserIDProps } from "@/app";
-import { BackgroundColour, ButtonColour, HolderColour } from "@/custom_modules/CustomStyles";
+import { BackgroundColour, ButtonColour, HolderColour, TooFarButtonColour } from "@/custom_modules/CustomStyles";
 import { CreateComment, defaultProfilePictureURL, HasUserLikedPost, LikePost, ReturnFullPost, ReturnPostComments, ReturnPostLikes, UnlikePost } from "@/custom_modules/DBConnect";
 import { CheckDistance, ConvertCommentListToProps, ConvertPostDetailsToProps, ConvertSQLCoordsToNumber } from "@/custom_modules/HelperFunctions";
 import { CommentHolder, CommentProps, ImageURLType, PostProps } from "@/custom_modules/PostComponents";
@@ -66,7 +66,7 @@ export default function FullPostScreen(props: GlobalUserIDProps) {
                                     <Text style={styles.authorText}>{postDetails?.authorName}</Text>
                                 </View>
                             </Pressable>
-                            <LikeButton postID={localPostID} userID={props.userID}/>
+                            <LikeButton postID={localPostID} userID={props.userID} withinRange={withinRange}/>
                         </View>
                         <ContentImage imageURL={postDetails?.postMediaURL}/>
                         <View style={styles.postBodyContainer}>
@@ -99,6 +99,7 @@ function ContentImage(props: ImageURLType) {
 type LikeButtonProps = {
     userID: number;
     postID: number;
+    withinRange: boolean;
 }
 
 function LikeButton(props: LikeButtonProps) {
@@ -146,19 +147,28 @@ function LikeButton(props: LikeButtonProps) {
         }
     }
 
-    if (!hasLiked) {
-        return (
-            <Pressable style={styles.likesButton} onPress={async() => {LikePostPress()}}>
-                <FontAwesome name={"heart-o"} size={30}/>
-                <Text style={styles.likesText}>{postLikes}</Text>
-            </Pressable>
-        )
+    if (props.withinRange) {
+        if (!hasLiked) {
+            return (
+                <Pressable style={styles.likesButton} onPress={async() => {LikePostPress()}}>
+                    <FontAwesome name={"heart-o"} size={30}/>
+                    <Text style={styles.likesText}>{postLikes}</Text>
+                </Pressable>
+            )
+        } else {
+            return (
+                <Pressable style={styles.likesButton} onPress={async() => {UnlikePostPress()}}>
+                    <FontAwesome name={"heart"} size={30}/>
+                    <Text style={styles.likesText}>{postLikes}</Text>
+                </Pressable>
+            )
+        }
     } else {
         return (
-            <Pressable style={styles.likesButton} onPress={async() => {UnlikePostPress()}}>
+            <View style={styles.tooFarLikesButton}>
                 <FontAwesome name={"heart"} size={30}/>
                 <Text style={styles.likesText}>{postLikes}</Text>
-            </Pressable>
+            </View>
         )
     }
 }
@@ -262,6 +272,15 @@ const styles = StyleSheet.create({
     
     likesButton: {
         backgroundColor: ButtonColour,
+        flexDirection:'row',
+        alignItems:'center',
+        justifyContent:'center',
+        padding:15,
+        borderRadius:10
+    },
+
+    tooFarLikesButton: {
+        backgroundColor: TooFarButtonColour,
         flexDirection:'row',
         alignItems:'center',
         justifyContent:'center',

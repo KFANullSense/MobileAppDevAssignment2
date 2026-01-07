@@ -100,7 +100,7 @@ export async function ConvertPostDetailsToProps(inputData: Array<JSON>) {
 export async function ConvertCommentListToProps(inputData: Array<JSON>) {
     const requests = await Promise.all(inputData.map(async (localComment) => {
         const localCommentAuthor = await ReturnUserDetails({userID: localComment.user_id});
-        const localCommentProps: CommentProps = {authorName: localCommentAuthor[0].username, authorPictureURL: localCommentAuthor[0].profile_picture_url, commentText: localComment.postcomment_text};
+        const localCommentProps: CommentProps = {authorName: localCommentAuthor[0].username, authorPictureURL: localCommentAuthor[0].profile_picture_url, commentText: localComment.postcomment_text, authorID: localComment.user_id};
         
         return localCommentProps;
     }));

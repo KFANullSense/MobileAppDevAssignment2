@@ -5,6 +5,7 @@ export const HolderColour = '#50bbc9ff';
 export const HolderColourDark = '#3694a0ff';
 export const HolderColourLight = '#54d0e0ff';
 export const ButtonColour = '#45b6fe';
+export const TooFarButtonColour = '#687a80ff';
 
 export const editButtonStyles = StyleSheet.create({
     editRow: {

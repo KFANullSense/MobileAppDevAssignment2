@@ -279,6 +279,7 @@ export function CommentHolder(props: CommentHolderProps) {
                 authorName={localComment.authorName}
                 authorPictureURL={localComment.authorPictureURL}
                 commentText={localComment.commentText}
+                authorID={localComment.authorID}
                 key={i}
             />)}
         </View>
@@ -289,13 +290,18 @@ export type CommentProps = {
     authorName: string;
     authorPictureURL: string;
     commentText: string;
+    authorID: number;
 }
 
 export function CommentObject(props: CommentProps) {
+    const navigation = useNavigation();
+
     return (
         <View style={commentStyles.container}>
             <View style={commentStyles.contentRow}>
-                <Image source={{uri:props.authorPictureURL}} style={commentStyles.authorImage} resizeMode="cover"/>
+                <Pressable onPress={() => navigation.navigate("User Details", {userID: props.authorID})}>
+                    <Image source={{uri:props.authorPictureURL}} style={commentStyles.authorImage} resizeMode="cover"/>
+                </Pressable>
                 <View style={commentStyles.textColumn}>
                     <Text>{props.authorName}</Text>
                     <Text style={commentStyles.commentText}>{props.commentText}</Text>
