@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 
+//Colour palette shared throughout the application
 export const BackgroundColour = '#b6dee5ff';
 export const HolderColour = '#50bbc9ff';
 export const HolderColourDark = '#3694a0ff';
@@ -7,6 +8,7 @@ export const HolderColourLight = '#54d0e0ff';
 export const ButtonColour = '#45b6fe';
 export const TooFarButtonColour = '#687a80ff';
 
+//Stylesheet used by multiple modals and components
 export const editButtonStyles = StyleSheet.create({
     editRow: {
         flexDirection:'row',

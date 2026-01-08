@@ -6,7 +6,7 @@ import { ImagePicker, ImagePlaceholder, LoadingModal } from "@/custom_modules/Im
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
-import { Keyboard, Pressable, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
+import { Alert, Keyboard, Pressable, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 export default function CreateEventScreen(props: GlobalUserIDProps) {
@@ -34,27 +34,30 @@ export default function CreateEventScreen(props: GlobalUserIDProps) {
     const [imageModalVisible, setImageModalVisible] = useState(false);
     const [loadingModalVisible, setLoadingModalVisible] = useState(false);
 
+    //Make sure all inputs are valid before sending to the server
     async function ValidateInput() {
         if (title.length == 0 || description.length == 0) {
-            console.error("Title and description cannot be empty")
+           Alert.alert("Title and description cannot be empty")
         } else {
             if (title.length <= 2) {
-                console.error("Title must be at least 3 characters long!");
+                Alert.alert("Title must be at least 3 characters long!");
             } else {
                 if (endTime <= startTime) {
-                    console.error("End time cannot be before or equal to start time");
+                    Alert.alert("End time cannot be before or equal to start time");
                 } else {
                     const locationValue = await GetCurrentLocationForSQL();
 
                     if (locationValue == "") {
-                        console.error("Error while fetching location");
+                        Alert.alert("Error while fetching location");
                     } else {
                         var currImage = "";
                         var imageSuccess = true;
 
+                        //If an image is specified, make sure that it uploads correctly before creating the event
                         if (localImage != "") {
                             imageSuccess = false;
                             
+                            //Show loading modal while image is uploading, hide after
                             setLoadingModalVisible(true);
                             const imagePath = await UploadImage({userID: props.userID, imageURI: localImage});
                             setLoadingModalVisible(false);
@@ -68,6 +71,7 @@ export default function CreateEventScreen(props: GlobalUserIDProps) {
                         if (imageSuccess == true) {
                             const result = await CreateEvent({eventName: title, eventDescription: description, positionString: locationValue, eventStartTime: ConvertDateTimeForSQL(startTime), eventEndTime: ConvertDateTimeForSQL(endTime), userID: props.userID, eventImageURL: currImage})
         
+                            //If creation is successful, leave the create screen
                             if (result == true) {
                                 navigation.goBack();
                             }

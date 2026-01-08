@@ -6,7 +6,7 @@ import { BorderLine, EventProps, ImageURLType } from "@/custom_modules/PostCompo
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import { useCallback, useRef, useState } from "react";
-import { Image, Keyboard, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
+import { Alert, Image, Keyboard, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 
 
 export default function FullEventScreen(props: GlobalUserIDProps) {
@@ -17,6 +17,7 @@ export default function FullEventScreen(props: GlobalUserIDProps) {
     const [isHost, setIsHost] = useState(false);
     const [withinRange, setWithinRange] = useState(false);
     
+    //Check event details, whether user is host and whether user is in range to interact
     async function FetchData() {
             const eventData = await ReturnFullEvent({eventID: localEventID});
             const eventProps = ConvertEventDetailsToProp(eventData);
@@ -37,10 +38,6 @@ export default function FullEventScreen(props: GlobalUserIDProps) {
 
         }
     }, []));
-
-    // useEffect(()  => {
-    //     navigation.setOptions({title: eventDetails?.eventName});
-    // }, [eventDetails]);
     
     return (
         
@@ -79,6 +76,7 @@ type EventEditModalProps = {
     successFunction: Function;
 }
 
+//If the user is hosting, allow them to change the event name
 function EventNameDisplay (props: EventEditModalProps) { 
     const [modalVisible, setModalVisible] = useState(false);
     const [eventNameString, setEventNameString] = useState("");
@@ -92,7 +90,7 @@ function EventNameDisplay (props: EventEditModalProps) {
 
     async function ModalUpdateEventName() {
         if (eventNameString.length <= 2) {
-            console.error("Event name must be at least three characters long!");
+            Alert.alert("Event name must be at least three characters long!");
             return;
         }
 
@@ -142,6 +140,7 @@ function EventNameDisplay (props: EventEditModalProps) {
     }
 }
 
+//If user is host, allow them to change event description
 function EventDescriptionDisplay(props: EventEditModalProps) {
     const [modalVisible, setModalVisible] = useState(false);
     const [eventDescriptionString, setEventDescriptionString] = useState("");
@@ -155,7 +154,7 @@ function EventDescriptionDisplay(props: EventEditModalProps) {
 
     async function ModalUpdateEventDescription() {
         if (eventDescriptionString.length == 0) {
-            console.error("Event description cannot be empty!");
+            Alert.alert("Event description cannot be empty!");
             return;
         }
 
@@ -250,6 +249,7 @@ function ButtonHolder (props: ButtonHolderProps) {
         navigation.goBack();
     }
 
+    //If host, show posts and delete, if joined, show view and leave, if not joined, show join
     if (localHasJoinedEvent) {
         if (props.IsHost) {
             return (

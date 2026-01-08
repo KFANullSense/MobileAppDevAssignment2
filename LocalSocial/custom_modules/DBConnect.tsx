@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { Alert } from 'react-native';
 
 export const defaultProfilePictureURL = "https://kfsnhareeqqsrlnwylox.supabase.co/storage/v1/object/public/files/public/emptypfp.jpg";
 
@@ -14,12 +15,13 @@ export async function CreateUser(props: UserDetailsProps) {
     const usernameAvailable = await CheckIfUsernameAvailable(props.username);
 
     if (!usernameAvailable) {
-        console.error("Username already in use");
+        console.error("Username is in use!");
     } else {
         const {error} = await supabase.from("users").insert({ username: props.username, password: props.password, profile_picture_url: defaultProfilePictureURL});
 
         if (error) {
             console.error("Error creating user:", error);
+            Alert.alert("Error creating user:", error.message);
         } else {
             return LogInToUser(props);
         }
@@ -35,8 +37,10 @@ export async function LogInToUser(props: UserDetailsProps) {
     const {data, error} = await supabase.from("users").select("user_id").eq("username", props.username).eq("password", props.password);
     if (error) {
         console.error("Error logging in:", error);
+        Alert.alert("Error logging in:", error.message);
+
     } else if (data.length == 0) {
-        console.error("Could not find a user with those details");
+        Alert.alert("Could not find a user with those details");
     }
     else if (data) {
         return data[0].user_id;
@@ -71,7 +75,7 @@ export async function ReturnPostComments(props: PostIDProps) {
     const {data, error} = await supabase.from("post_comments").select("*").eq("post_id", props.postID).order('post_comment_timestamp', {ascending:false});
 
     if (error) {
-        console.error("Error retrieving comments from post:", error)
+        console.error("Error retrieving comments from post:", error);
     } else {
         return data;
     }
@@ -796,7 +800,7 @@ export async function CheckIfUsernameAvailable(nameToCheck: string) {
     if (fetchError) {
         console.error("Error checking name", fetchError);
     } else if (fetchCount >= 1) {
-        console.error("Username is in use");
+        Alert.alert("Username is in use");
     } else {
         console.log("Name is free");
         return true;
@@ -850,6 +854,7 @@ type ChatMessageProps = {
     messageText: string;
 }
 
+//Creates a chat message on the database between two specified users
 export async function SendChatMessage(props: ChatMessageProps) {
     console.log("Sending chat message from user", props.senderID, "to user", props.receiverID, "with message text", props.messageText);
 
@@ -864,6 +869,7 @@ export async function SendChatMessage(props: ChatMessageProps) {
     return false;
 }
 
+//Returns all chat messages between two specified users
 export async function RetrieveChatMessages(props: FollowUserProps) {
     console.log("Retrieving chat messages between users", props.localUserID, "and", props.userToFollowID);
 

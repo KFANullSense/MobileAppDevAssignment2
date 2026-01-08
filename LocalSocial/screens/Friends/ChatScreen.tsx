@@ -6,7 +6,7 @@ import { MessageHolder, MessageProps } from "@/custom_modules/PostComponents";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFocusEffect, useRoute } from "@react-navigation/native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 
 export default function ChatScreen(props: GlobalUserIDProps) {
     const params = useRoute().params;
@@ -26,6 +26,7 @@ export default function ChatScreen(props: GlobalUserIDProps) {
         }
     }, []));
 
+    //Refresh the chat messages every 3 seconds
     useEffect(() => {
         const chatRefresh = setInterval(() => {
             FetchMessages();
@@ -43,6 +44,7 @@ export default function ChatScreen(props: GlobalUserIDProps) {
             if (propData) {
                 setMessageList(propData);
 
+                //On first message fetch, wait a moment and scroll to the end of the scrollview (it doesn't get the contentsizechange on initial fetch so has to be done manually)
                 if (wasInitialFetch) {
                     await new Promise(res => setTimeout(res, 500));
                     scrollViewRef.current.scrollToEnd({animated:true});
@@ -52,14 +54,20 @@ export default function ChatScreen(props: GlobalUserIDProps) {
     }
 
     async function SendMessage() {
-        const result = await (SendChatMessage({senderID: props.userID, receiverID: otherUserID, messageText: newMessageText}));
-        
-        if (result) {
-            inputRef.current.clear();
-            FetchMessages();
+        if (newMessageText == "") {
+            Alert.alert("Chat message cannot be empty!");
+        } else {
+            const result = await (SendChatMessage({senderID: props.userID, receiverID: otherUserID, messageText: newMessageText}));
+            
+            //If message sent sucecssfully, clear the input box and refresh messages
+            if (result) {
+                inputRef.current.clear();
+                FetchMessages();
+            }
         }
     }
 
+    //When the scrollview contents change, scroll to the bottom
     return (
         <View style={styles.container}>
             <View style={styles.messageContainer}>

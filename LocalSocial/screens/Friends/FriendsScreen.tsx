@@ -40,7 +40,6 @@ export default function RootScreen(props: GlobalUserIDProps) {
 function FriendsScreen (props: GlobalUserIDProps) {
     const [componentList, setComponentList] = useState<FriendObjectProps[]>([]);
 
-
     useFocusEffect(useCallback(() => {
         const fetchUsers = async () => {
             const friendData = await GetFollowingList({userID: props.userID});

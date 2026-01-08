@@ -11,10 +11,12 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+//This prop is used by most components to keep track of the local user's ID
 export type GlobalUserIDProps = {
     userID: number;
 }
 
+//Tab navigator between main screens
 const TabNav = (props: GlobalUserIDProps) => {
     const Tab = createBottomTabNavigator();
     return (
@@ -91,6 +93,7 @@ export default function App() {
         setLocalUserID(newUserID);
     }
 
+    //If the user does not have a local ID, show the login screen. Otherwise, show the main app and pass their ID.
     if (localUserID == -1) {
         return (
             <SafeAreaProvider>

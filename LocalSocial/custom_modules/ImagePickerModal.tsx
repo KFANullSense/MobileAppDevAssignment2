@@ -13,6 +13,7 @@ export function ImagePicker(props: ImagePickerProps) {
     const [localImageURI, setLocalImageURI] = useState("");
 
     async function PickImage () {
+        //Get permission to check image library
         const permissionResult = await requestMediaLibraryPermissionsAsync();
 
         if (!permissionResult) {
@@ -20,19 +21,20 @@ export function ImagePicker(props: ImagePickerProps) {
             return;
         }
 
+        //Launch image library and let user pick one (and crop if they want)
         let result = await launchImageLibraryAsync({
             mediaTypes: ['images'],
             allowsEditing:true,
-            aspect:[4,3],
             quality:1
         })
 
+        //If they pick an image, set it to be previewed
         if (!result.canceled) {
             setLocalImageURI(result.assets[0].uri);
         }
     }
 
-    async function ModalUpdateImage() {
+    function ModalUpdateImage() {
         props.setModalVisible(false);
         props.updateImageFunc(localImageURI);
     }
@@ -66,8 +68,8 @@ type UploadPreviewImageProps = {
     imageURL: string;
 }
 
+//If the preview image is specified, render it, otherwise don't
 function UploadPreviewImage(props: UploadPreviewImageProps) {
-    
     if (props.imageURL == "") {
         return (
             <View>
@@ -86,6 +88,7 @@ type ImagePlaceholdeProps = {
     setModalVisibleFunc: (newState: boolean) => void;
 }
 
+//If the image has been submitted, show it on the button, otherwise show the placeholder
 export function ImagePlaceholder(props: ImagePlaceholdeProps) {
     if (props.localImageURI == "") {
         return (

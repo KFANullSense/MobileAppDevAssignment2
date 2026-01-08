@@ -48,6 +48,8 @@ export default function EventPostsScreen(props: GlobalUserIDProps) {
 
             const currLocation = await GetCurrentLocationCoords();
             setLocalUserLocation(currLocation);
+
+            //Check if the user is close enough to the event to create a post
             const rangeCheck = CheckDistance({startLocation: currLocation, endLocation: ConvertSQLCoordsToNumber(eventDataProp.eventLocation)});
             setWithinRange(rangeCheck);
         }
@@ -90,6 +92,7 @@ type PostButtonProps = {
 function PostButtonComponent(props: PostButtonProps) {
     const navigation = useNavigation();
 
+    //If user is not within range, show a grey cross instead of a blue plus
     if (props.WithinRange) {
         return (
             <View style={styles.floatingContainer}>

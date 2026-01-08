@@ -7,7 +7,7 @@ import { BorderLine, HomePostHolderProps, HomePostRoot } from "@/custom_modules/
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useFocusEffect, useRoute } from "@react-navigation/native";
 import { useCallback, useRef, useState } from "react";
-import { Image, Keyboard, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
+import { Alert, Image, Keyboard, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export type ProfileProps = {
@@ -119,8 +119,7 @@ type ProfileEditFollowModalProps = {
     fetchFollowersFunction: Function;
 }
 
-
-
+//If host, show username edit button, otherwise show follow button
 function UsernameHeader(props:ProfileEditFollowModalProps) {    
     const [modalVisible, setModalVisible] = useState(false);
     const [usernameString, setUsernameString] = useState("");
@@ -134,7 +133,7 @@ function UsernameHeader(props:ProfileEditFollowModalProps) {
 
     async function ModalUpdateUsername() {
         if (usernameString.length <= 2) {
-            console.error("Username must be at least three characters long!");
+            Alert.alert("Username must be at least three characters long!");
             return;
         }
 
@@ -191,7 +190,7 @@ function ProfilePictureDisplay(props:ProfileEditModalProps) {
 
     async function ModalUpdateProfilePicture(newImageURL: string) {
         if (newImageURL == "") {
-            console.error("Must select an image to set as profile picture!");
+            Alert.alert("Must select an image to set as profile picture!");
             return;
         }
         
@@ -200,7 +199,7 @@ function ProfilePictureDisplay(props:ProfileEditModalProps) {
         setLoadingModalVisible(false);
 
         if (imagePath) {
-            const result = await UpdateUserProfilePicture({userID: props.userID, newString: newImageURL});
+            const result = await UpdateUserProfilePicture({userID: props.userID, newString: imagePath});
 
             if (result) {
                 props.successFunction();
@@ -387,7 +386,7 @@ const styles = StyleSheet.create({
         marginTop:10,
     },
     profilePicture: {
-        width:'50%',
+        height:175,
         aspectRatio:1, 
         borderRadius:250,
     },

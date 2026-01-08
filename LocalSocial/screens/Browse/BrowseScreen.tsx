@@ -23,25 +23,26 @@ export function BrowseScreen(props: GlobalUserIDProps) {
 
     useFocusEffect(useCallback(() => {
         const fetchCoords = async () => {
-            const eventData = await GetCurrentLocationCoords();
+            const coordData = await GetCurrentLocationCoords();
 
-            setLocalCoords({latitude: eventData.latitude, longitude: eventData.longitude})
+            setLocalCoords({latitude: coordData.latitude, longitude: coordData.longitude})
 
-            mapRef.current.animateCamera({
-                center: {
-                    latitude: eventData.latitude,
-                    longitude: eventData.longitude
-                }
-            })
-
-            if (eventData) {
-                const nearby = await GetNearbyEvents({location: ConvertCoordsForSQL(eventData)});
+            if (coordData) {
+                const nearby = await GetNearbyEvents({location: ConvertCoordsForSQL(coordData)});
                 setNearbyEvents(ConvertEventListToProps(nearby));
             } else {
                 console.log("no event data");
             }
 
+            //Wait for a bit and then move the map view to the user's location
+            await new Promise(res => setTimeout(res, 500));
 
+            mapRef.current.animateCamera({
+                center: {
+                    latitude: coordData.latitude,
+                    longitude: coordData.longitude
+                }
+            })
         }
 
         fetchCoords();
@@ -77,6 +78,7 @@ export function BrowseScreen(props: GlobalUserIDProps) {
 export function EventMarkers(props: EventHolderProps) {
     const navigation = useNavigation();
 
+    //Make a list of markers from the event detail array
     return (props.eventList.map((localEvent, i) =>
         <Marker
             key={i}
@@ -94,7 +96,7 @@ export function EventMarkers(props: EventHolderProps) {
 const Stack = createNativeStackNavigator();
 
 function RootStack(props:GlobalUserIDProps) {
-    //From my events screen, only joined events will be shown, so joined event is assumed to be true for the full screen props
+    //From the my events screen, only joined events will be shown, so joined event is assumed to be true for the full screen props
     
     return (
         <Stack.Navigator initialRouteName="Root">

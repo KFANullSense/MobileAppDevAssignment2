@@ -4,6 +4,7 @@ import getDistance from 'geolib/es/getDistance';
 import { CheckIfUsersAreMutuallyFollowing, GetJoinedEvents, GetRecentPostsFromEvent, GetRecentPostsFromEventByUser, ReturnUserDetails } from './DBConnect';
 import { CommentProps, EventProps, FriendObjectProps, HomePostHolderProps, MessageProps, PostProps } from './PostComponents';
 
+//Converts a react Date into a string for sending to the database
 export function ConvertDateTimeForSQL(inputDate: Date) {
     //get month returns one less, add one to be correct (not sure why only month does this and not the others? oh well)
     return inputDate.getFullYear() + "-" + (inputDate.getMonth() + 1) + "-" + inputDate.getDate() + " " + inputDate.getHours() + ":" + inputDate.getMinutes();
@@ -14,15 +15,18 @@ export type LocationHolder = {
     longitude: number;
 }
 
+//Gets current coordinates from the location api
 export async function GetCurrentLocationCoords(): Promise<LocationHolder> {
     console.log("Attempting to get location");
 
+    //Get permissions
     const {status} = await Location.requestForegroundPermissionsAsync();
     if (status != 'granted') {
         console.error("Permission to use location was denied");
         return {latitude: 0, longitude: 0};
     }
 
+    //If permission granted, get current position and return as a LocationHolder
     const location = await Location.getCurrentPositionAsync({accuracy: Location.LocationAccuracy.High});
     if (location) {
         return {latitude: location.coords.latitude, longitude: location.coords.longitude};
@@ -31,11 +35,13 @@ export async function GetCurrentLocationCoords(): Promise<LocationHolder> {
     return {latitude: 0, longitude: 0};
 }
 
+//Convert a LocationHolder to a string for use with the database
 export function ConvertCoordsForSQL(inputCoords: LocationHolder) {
     const returnString: string = "(" + inputCoords.latitude + "," + inputCoords.longitude + ")";
     return returnString;
 }
 
+//Same as the get current location above, except stores as a string for use with the database straight away (could probably just run the other coords function and pass the result into the conversion function? too late now, don't want to mess with what works)
 export async function GetCurrentLocationForSQL(): Promise<string> {
     console.log("Attempting to get location");
 
@@ -50,6 +56,7 @@ export async function GetCurrentLocationForSQL(): Promise<string> {
     return returnString;
 }
 
+//Converts a location string from the database into a LocationHolder
 export function ConvertSQLCoordsToNumber(inputString: string): LocationHolder {
     const trimmedString = inputString.replace(/[()]/g, ''); 
     const coordNumbers = trimmedString.split(",");
@@ -57,6 +64,7 @@ export function ConvertSQLCoordsToNumber(inputString: string): LocationHolder {
     return {latitude: Number(coordNumbers[0]), longitude: Number(coordNumbers[1])}
 }
 
+//Takes in a JSON array of event details, maps to a list of EventProps
 export function ConvertEventListToProps(inputData: Array<JSON>) {
     var propList: EventProps[] = [];
 
@@ -67,6 +75,7 @@ export function ConvertEventListToProps(inputData: Array<JSON>) {
     return propList;
 }
 
+//Takes in a JSON array of event details, turns first result into EventProps
 export function ConvertEventDetailsToProp(inputData: Array<JSON>) {
     const eventJSON: JSON = inputData[0];
 
@@ -75,6 +84,7 @@ export function ConvertEventDetailsToProp(inputData: Array<JSON>) {
     return returnProp;
 }
 
+//Takes in a JSON array of post details, maps to a list of PostProps
 export async function ConvertPostListToProps(inputData: Array<JSON>) {
     const requests = await Promise.all(inputData.map(async (localPost) => {
         const localPostAuthor = await ReturnUserDetails({userID: localPost.user_id});
@@ -85,6 +95,7 @@ export async function ConvertPostListToProps(inputData: Array<JSON>) {
     return requests;
 }
 
+//Takes in a JSON array of post details, turns first result into PostProps
 export async function ConvertPostDetailsToProps(inputData: Array<JSON>) {
     const profileJSON: JSON = inputData[0];
 
@@ -97,6 +108,7 @@ export async function ConvertPostDetailsToProps(inputData: Array<JSON>) {
     return returnProp;
 }
 
+//Takes in a JSON array of comment details, maps to a list of CommentProps
 export async function ConvertCommentListToProps(inputData: Array<JSON>) {
     const requests = await Promise.all(inputData.map(async (localComment) => {
         const localCommentAuthor = await ReturnUserDetails({userID: localComment.user_id});
@@ -108,6 +120,7 @@ export async function ConvertCommentListToProps(inputData: Array<JSON>) {
     return requests;
 }
 
+//Takes in a user ID, fetches events joined by the user, and makes a list of posts from each of those events
 export async function RetrieveRecentPostsForUser(localUserID: number) {
     const eventData: Array<JSON> = await GetJoinedEvents({userID: localUserID});
 
@@ -115,6 +128,8 @@ export async function RetrieveRecentPostsForUser(localUserID: number) {
         const localEventProps = ConvertEventDetailsToProp([localEvent]);
         const localPostData = await GetRecentPostsFromEvent({eventID: localEventProps.eventID});
         const localPostPropsList: PostProps[] = await ConvertPostListToProps(localPostData);
+        
+        //Location data isn't necessary here, so location saved as 0 (this will be the same for most props for PostObjects)
         const localHomePostProps: HomePostHolderProps = {postList: localPostPropsList, eventProps: localEventProps, userLocation: {latitude:0, longitude:0}};
 
         return localHomePostProps;
@@ -123,6 +138,9 @@ export async function RetrieveRecentPostsForUser(localUserID: number) {
     return requests;
 }
 
+//Takes in a user ID, fetches all events joined by the user, and then makes a list of posts specifically they have made on those events
+//This is a roundabout way to do this, would be better to fetch posts first and events after (this would also prevent posts from not showing if a user leaves an event after)
+//But not super necessary to change as it's only recent posts shown anyway, so not needed to be a comprehensive list
 export async function RetrieveRecentPostsByUser(localUserID: number) {
     const eventData: Array<JSON> = await GetJoinedEvents({userID: localUserID});
 
@@ -151,6 +169,7 @@ type CheckDistanceProps = {
     endLocation: LocationHolder;
 }
 
+//Checks if the distance between two given location points is below a threshold (used for checking if close enough to interact)
 export function CheckDistance(props: CheckDistanceProps) {
     const maxRange = 500;
 
@@ -166,6 +185,7 @@ export function CheckDistance(props: CheckDistanceProps) {
     return true;
 }
 
+//Takes in a JSON array, converts first item to ProfileProps
 export function ConvertProfileDetailsToProps(inputData: Array<JSON>) {
     const profileJSON: JSON = inputData[0];
 
@@ -179,6 +199,7 @@ type LocalUserUserListProps = {
     userList: Array<JSON>;
 }
 
+//Takes in a JSON array of users, maps them to FriendObjectProps (while also checking if that user and the local user are mutually following for use with chat)
 export async function ConvertUserListToProps(props: LocalUserUserListProps) {
     const requests = await Promise.all(props.userList.map(async (localProfile) => {
         const isMutualVar = await CheckIfUsersAreMutuallyFollowing({localUserID: props.localUser, userToFollowID: localProfile.user_id})
@@ -197,7 +218,9 @@ type ChatScreenProps = {
     messageDataArray: Array<JSON>;
 }
 
+//Takes in a JSON array of messages (as well as user IDs of the chat members) and adds them to a list along with user details
 export async function ConvertMessageListToProps(props: ChatScreenProps) {
+    //Fetch the user profile details first so that it doesn't make a DB fetch for each message
     const localUserData = await ReturnUserDetails({userID: props.localUserID});
     const otherUserData = await ReturnUserDetails({userID: props.otherUserID});
 
@@ -208,6 +231,7 @@ export async function ConvertMessageListToProps(props: ChatScreenProps) {
 
     props.messageDataArray.map(localMessage => {
         if (localMessage.message_sender_id == props.localUserID) {
+            //Unshift here so that messages appear newest at the bottom for the ScrollView
             messagePropList.unshift({authorName: localUserProps.username, authorPictureURL: localUserProps.profilePictureURL, messageText: localMessage.message_contents});
         } else {
             messagePropList.unshift({authorName: otherUserProps.username, authorPictureURL: otherUserProps.profilePictureURL, messageText: localMessage.message_contents});

@@ -6,7 +6,7 @@ import { ImagePicker, ImagePlaceholder, LoadingModal } from "@/custom_modules/Im
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import React, { useState } from "react";
-import { Keyboard, Pressable, StyleSheet, TextInput, TouchableWithoutFeedback, View } from "react-native";
+import { Alert, Keyboard, Pressable, StyleSheet, TextInput, TouchableWithoutFeedback, View } from "react-native";
 
 export default function CreatePostScreen(props: GlobalUserIDProps) {
     const navigation = useNavigation();
@@ -21,14 +21,15 @@ export default function CreatePostScreen(props: GlobalUserIDProps) {
     const [imageModalVisible, setImageModalVisible] = useState(false);
     const [loadingModalVisible, setLoadingModalVisible] = useState(false);
 
+    //Mostly the same as on CreateEvent, see there for further comments
     async function ValidateInput() {
         if (title.length == 0 || body.length == 0) {
-            console.error("Title and body cannot be empty")
+            Alert.alert("Title and body cannot be empty")
         } else {
             const locationValue = await GetCurrentLocationForSQL();
 
             if (locationValue == "") {
-                console.error("Error while fetching location");
+                Alert.alert("Error while fetching location");
             } else {
                 const currLocation = await GetCurrentLocationForSQL();
                 var currImage = "";
@@ -48,7 +49,8 @@ export default function CreatePostScreen(props: GlobalUserIDProps) {
                 }
 
                 if (imageSuccess == true) {
-                    const result = await CreatePost({postTitle: title, postBody: body, postImageUrl: currImage, eventID: localEventID, authorID: props.userID, location: currLocation})
+                    const result = await CreatePost({postTitle: title, postBody: body, postImageUrl: currImage, eventID: localEventID,
+                        authorID: props.userID, location: currLocation})
 
                     if (result == true) {
                         navigation.goBack();

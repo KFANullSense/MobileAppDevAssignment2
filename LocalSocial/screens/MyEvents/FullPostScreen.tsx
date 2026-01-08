@@ -6,7 +6,7 @@ import { CommentHolder, CommentProps, ImageURLType, PostProps } from "@/custom_m
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import { useCallback, useRef, useState } from "react";
-import { Image, Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
+import { Alert, Image, Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 
 
 export default function FullPostScreen(props: GlobalUserIDProps) {
@@ -129,6 +129,7 @@ function LikeButton(props: LikeButtonProps) {
         }
     }
 
+    //After liking or unliking, update like number
     async function LikePostPress() {
         const result = await LikePost({postID: props.postID, userID: props.userID});
 
@@ -147,6 +148,7 @@ function LikeButton(props: LikeButtonProps) {
         }
     }
 
+    //If out of range, like button is greyed out
     if (props.withinRange) {
         if (!hasLiked) {
             return (
@@ -185,14 +187,20 @@ function CommentInputContainer(props: CommentInputProps) {
     const [newCommentText, setNewCommentText] = useState("");
     
     async function PostComment() {
-        const result = await (CreateComment({postID: props.PostID, userID: props.UserID, commentText: newCommentText}));
+        if (newCommentText == "") {
+            Alert.alert("Comment cannot be empty!");
+        } else {
+            const result = await (CreateComment({postID: props.PostID, userID: props.UserID, commentText: newCommentText}));
 
-        if (result) {
-            commentRef.current.clear();
-            props.FetchCommentFunc();
+            //If comment posted successfully, clear input text and update comments
+            if (result) {
+                commentRef.current.clear();
+                props.FetchCommentFunc();
+            }
         }
     }
 
+    //If within range, show comment input, otherwise show message
     if (props.WithinRange) {
         return (
             <View style={styles.commentInputContainer}>
