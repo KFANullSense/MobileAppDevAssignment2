@@ -8,7 +8,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import { StyleSheet, Text } from "react-native";
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { SafeAreaView } from "react-native-safe-area-context";
 import CreatePostScreen from "../MyEvents/CreatePostScreen";
 import EventPostsScreen from "../MyEvents/EventPostsScreen";
@@ -68,6 +68,7 @@ export function BrowseScreen(props: GlobalUserIDProps) {
                 followsUserLocation={true}
                 showsUserLocation={true}
                 ref={mapRef}
+                provider={PROVIDER_GOOGLE}
             >
                 <EventMarkers eventList={nearbyEvents}/>
             </MapView>
