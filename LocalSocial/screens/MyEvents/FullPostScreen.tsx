@@ -59,15 +59,7 @@ export default function FullPostScreen(props: GlobalUserIDProps) {
                 <Text style={styles.header}>{postDetails?.postTitle}</Text>
                 <View style={styles.scrollViewHolder}>
                     <ScrollView contentContainerStyle={styles.scrollContainer}>
-                        <View style={styles.authorLikesContainer}>
-                            <Pressable onPress={() => navigation.navigate("User Details", {userID: postDetails?.authorID})}>
-                                <View style={styles.authorContainer}>
-                                    <Image source={{uri:postDetails.authorPictureURL}} style={styles.authorImage} resizeMode="cover"/>
-                                    <Text style={styles.authorText}>{postDetails?.authorName}</Text>
-                                </View>
-                            </Pressable>
-                            <LikeButton postID={localPostID} userID={props.userID} withinRange={withinRange}/>
-                        </View>
+                        <AuthorContainer localPostID={localPostID} localUserID={props.userID} withinRange={withinRange} postDetails={postDetails}/>
                         <ContentImage imageURL={postDetails?.postMediaURL}/>
                         <View style={styles.postBodyContainer}>
                             <Text style={styles.postBodyText}>{postDetails?.postBody}</Text>
@@ -84,6 +76,43 @@ export default function FullPostScreen(props: GlobalUserIDProps) {
             </View>
         </TouchableWithoutFeedback>
     )
+}
+
+type AuthorContainerProps = {
+    localUserID: number;
+    localPostID: number;
+    withinRange: boolean;
+    postDetails: PostProps;
+}
+
+function AuthorContainer(props: AuthorContainerProps) {
+    const navigation = useNavigation();
+
+    if (props.postDetails.authorID != -1) {
+        return (
+            <View style={styles.authorLikesContainer}>
+                <Pressable onPress={() => navigation.navigate("User Details", {userID: props.postDetails.authorID})}>
+                    <View style={styles.authorContainer}>
+                        <Image source={{uri:props.postDetails.authorPictureURL}} style={styles.authorImage} resizeMode="cover"/>
+                        <Text style={styles.authorText}>{props.postDetails.authorName}</Text>
+                    </View>
+                </Pressable>
+                <LikeButton postID={props.localPostID} userID={props.localPostID} withinRange={props.withinRange}/>
+            </View>
+        )
+    }
+    //If the author ID hasn't loaded yet, don't make the profile button interactable
+    else {
+        return (
+            <View style={styles.authorLikesContainer}>
+                <View style={styles.authorContainer}>
+                    <Image source={{uri:props.postDetails.authorPictureURL}} style={styles.authorImage} resizeMode="cover"/>
+                    <Text style={styles.authorText}>{props.postDetails.authorName}</Text>
+                </View>
+                <LikeButton postID={props.localPostID} userID={props.localPostID} withinRange={props.withinRange}/>
+            </View>
+        )
+    }
 }
 
 function ContentImage(props: ImageURLType) {
