@@ -97,7 +97,7 @@ function AuthorContainer(props: AuthorContainerProps) {
                         <Text style={styles.authorText}>{props.postDetails.authorName}</Text>
                     </View>
                 </Pressable>
-                <LikeButton postID={props.localPostID} userID={props.localPostID} withinRange={props.withinRange}/>
+                <LikeButton postID={props.localPostID} userID={props.localUserID} withinRange={props.withinRange}/>
             </View>
         )
     }
@@ -109,7 +109,7 @@ function AuthorContainer(props: AuthorContainerProps) {
                     <Image source={{uri:props.postDetails.authorPictureURL}} style={styles.authorImage} resizeMode="cover"/>
                     <Text style={styles.authorText}>{props.postDetails.authorName}</Text>
                 </View>
-                <LikeButton postID={props.localPostID} userID={props.localPostID} withinRange={props.withinRange}/>
+                <LikeButton postID={props.localPostID} userID={props.localUserID} withinRange={props.withinRange}/>
             </View>
         )
     }
